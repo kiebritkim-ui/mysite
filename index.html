@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Ottawa Life</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f0f0f;color:#e0e0e0;min-height:100vh}
+nav{display:flex;gap:0;background:#1a1a1a;border-bottom:1px solid #333;position:sticky;top:0;z-index:10}
+nav button{flex:1;padding:14px;background:none;border:none;color:#888;font-size:15px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s}
+nav button.active{color:#fff;border-bottom-color:#ff6b6b}
+.section{display:none;max-width:700px;margin:0 auto;padding:20px}
+.section.active{display:block}
+h2{margin-bottom:16px;font-size:22px}
+.add-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.add-row input,.add-row select{padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:14px}
+.add-row input{flex:1;min-width:120px}
+.add-row select{min-width:100px}
+.add-row button,.modal button.primary{padding:10px 18px;border-radius:8px;border:none;background:#ff6b6b;color:#fff;cursor:pointer;font-size:14px;white-space:nowrap}
+.add-row button:hover,.modal button.primary:hover{background:#ff5252}
+.card{background:#1a1a1a;border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;border:1px solid #262626}
+.card .info{flex:1}
+.card .info .name{font-weight:600}
+.card .info .name a{color:#ff6b6b;text-decoration:none}
+.card .info .name a:hover{text-decoration:underline}
+.card .info .meta{font-size:13px;color:#888;margin-top:2px}
+.card .info .comment{font-size:13px;color:#aaa;margin-top:4px;font-style:italic}
+.card .del{background:none;border:none;color:#555;font-size:20px;cursor:pointer;padding:0 4px;margin-left:8px;flex-shrink:0}
+.card .del:hover{color:#ff6b6b}
+.empty{text-align:center;color:#555;padding:40px 0}
+.search-row{margin-bottom:14px}
+.search-row input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:14px}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-header button{background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;padding:4px 10px}
+.cal-header button:hover{color:#fff}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:20px}
+.cal-grid .day-label{text-align:center;font-size:12px;color:#666;padding:6px 0}
+.cal-grid .day{text-align:center;padding:10px 4px;border-radius:8px;cursor:pointer;font-size:14px;position:relative}
+.cal-grid .day:hover{background:#262626}
+.cal-grid .day.today{background:#2a2a2a;font-weight:700}
+.cal-grid .day.has-event::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff6b6b}
+.cal-grid .day.empty-day{cursor:default}
+.cal-grid .day.empty-day:hover{background:none}
+.upcoming h3{font-size:16px;margin-bottom:10px;color:#aaa}
+.event-card{background:#1a1a1a;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid #262626}
+.event-card .meta{font-size:13px;color:#888;margin-top:2px}
+.event-card .recur{font-size:11px;background:#2a2a2a;color:#ff6b6b;padding:2px 8px;border-radius:10px;flex-shrink:0}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;justify-content:center;align-items:center}
+.overlay.show{display:flex}
+.modal{background:#1a1a1a;border-radius:14px;padding:24px;width:90%;max-width:440px;border:1px solid #333;max-height:90vh;overflow-y:auto}
+.modal h3{margin-bottom:16px}
+.modal label{display:block;font-size:13px;color:#888;margin:10px 0 4px}
+.modal input,.modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#0f0f0f;color:#e0e0e0;font-size:14px}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.modal button.secondary{padding:10px 18px;border-radius:8px;border:1px solid #333;background:none;color:#aaa;cursor:pointer;font-size:14px}
+.count{font-size:13px;color:#555;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<nav>
+  <button class="active" onclick="showTab('restaurants')">🍽 Restaurants</button>
+  <button onclick="showTab('movies')">🎬 Movies</button>
+  <button onclick="showTab('calendar')">📅 Calendar</button>
+</nav>
+
+<div id="restaurants" class="section active">
+  <h2>Ottawa Restaurants</h2>
+  <div class="search-row"><input id="r-search" placeholder="Search restaurants..." oninput="renderRestaurants()"></div>
+  <div class="add-row"><button onclick="openRestModal()">+ Add Restaurant</button></div>
+  <div class="count" id="r-count"></div>
+  <div id="r-list"></div>
+</div>
+
+<div id="movies" class="section">
+  <h2>Movies to Watch</h2>
+  <div class="add-row">
+    <input id="m-title" placeholder="Movie title">
+    <input id="m-genre" placeholder="Genre" style="max-width:130px">
+    <button onclick="addMovie()">Add</button>
+  </div>
+  <div id="m-list"></div>
+</div>
+
+<div id="calendar" class="section">
+  <h2>Recurring Events</h2>
+  <div class="add-row"><button onclick="openEventModal()">+ Add Event</button></div>
+  <div class="cal-header">
+    <button onclick="changeMonth(-1)">‹</button>
+    <span id="cal-title"></span>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="upcoming" id="upcoming"></div>
+</div>
+
+<div class="overlay" id="rest-modal">
+  <div class="modal">
+    <h3 id="rest-modal-title">Add Restaurant</h3>
+    <label>Name *</label><input id="r-name" placeholder="Restaurant name">
+    <label>Location</label><input id="r-location" placeholder="e.g. Orleans, Elgin Street">
+    <label>Food Type</label><input id="r-type" placeholder="e.g. Thai, Pizza, Korean BBQ">
+    <label>Comments</label><input id="r-comments" placeholder="Notes, recommendations...">
+    <label>Website</label><input id="r-url" placeholder="https://...">
+    <div class="actions">
+      <button class="secondary" onclick="closeRestModal()">Cancel</button>
+      <button class="primary" onclick="saveRestaurant()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="event-modal">
+  <div class="modal">
+    <h3>Add Recurring Event</h3>
+    <label>Event Name</label><input id="e-name" placeholder="e.g. Tulip Festival">
+    <label>Date</label><input id="e-date" type="date">
+    <label>Recurrence</label>
+    <select id="e-recur">
+      <option value="yearly">Yearly</option>
+      <option value="monthly">Monthly</option>
+      <option value="biannual">Every 2 Years</option>
+      <option value="quarterly">Every 3 Months</option>
+      <option value="once">One-time</option>
+    </select>
+    <label>Notes (optional)</label><input id="e-notes" placeholder="Details...">
+    <div class="actions">
+      <button class="secondary" onclick="closeEventModal()">Cancel</button>
+      <button class="primary" onclick="addEvent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="db.js"></script>
+<script src="defaults.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
