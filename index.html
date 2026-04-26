@@ -55,6 +55,27 @@ h2{margin-bottom:16px;font-size:22px}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
 .modal button.secondary{padding:10px 18px;border-radius:8px;border:1px solid #333;background:none;color:#aaa;cursor:pointer;font-size:14px}
 .count{font-size:13px;color:#555;margin-bottom:12px}
+.cat-fields{transition:.2s}
+.h-card{background:#1a1a1a;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid #262626;cursor:pointer}
+.h-card:hover{border-color:#444}
+.h-card .h-top{display:flex;justify-content:space-between;align-items:flex-start}
+.h-card .h-top .info{flex:1}
+.h-card .h-top .name{font-weight:600}
+.h-card .meta{font-size:13px;color:#888;margin-top:2px}
+.h-card .comment{font-size:13px;color:#aaa;margin-top:4px;font-style:italic}
+.h-card .h-tags{margin-top:6px}
+.h-tag{display:inline-block;font-size:11px;background:#2a2a2a;color:#ccc;padding:2px 8px;border-radius:10px;margin-right:4px}
+.h-tag.cat{color:#ff6b6b}
+.h-tag.priority-High{color:#ff4444}
+.h-tag.priority-Low{color:#66bb6a}
+.h-card .h-photos{display:flex;gap:4px;margin-top:8px;overflow-x:auto}
+.h-card .h-photos img{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #333}
+.h-actions{display:flex;gap:6px;flex-shrink:0;margin-left:8px}
+.h-actions button{background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:2px 4px}
+.h-actions button:hover{color:#ff6b6b}
+.maint-entry{background:#0f0f0f;border-radius:8px;padding:10px;margin-bottom:6px;font-size:13px;border:1px solid #262626;display:flex;justify-content:space-between;align-items:flex-start}
+.maint-entry .del{background:none;border:none;color:#555;cursor:pointer;font-size:16px}
+.maint-entry .del:hover{color:#ff6b6b}
 </style>
 </head>
 <body>
@@ -62,6 +83,7 @@ h2{margin-bottom:16px;font-size:22px}
 <nav>
   <button class="active" onclick="showTab('restaurants')">🍽 Restaurants</button>
   <button onclick="showTab('movies')">🎬 Movies</button>
+  <button onclick="showTab('house')">🏠 House</button>
   <button onclick="showTab('calendar')">📅 Calendar</button>
 </nav>
 
@@ -93,6 +115,139 @@ h2{margin-bottom:16px;font-size:22px}
   </div>
   <div class="cal-grid" id="cal-grid"></div>
   <div class="upcoming" id="upcoming"></div>
+</div>
+
+<div id="house" class="section">
+  <h2>House Tracker</h2>
+  <div class="search-row" style="display:flex;gap:8px">
+    <input id="h-search" placeholder="Search items..." oninput="renderHouse()" style="flex:1">
+    <select id="h-cat-filter" onchange="renderHouse()" style="width:auto;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:14px">
+      <option value="">All Categories</option>
+      <option value="Paint">🎨 Paint</option>
+      <option value="Appliance">🔌 Appliance</option>
+      <option value="Construction">🧱 Construction</option>
+      <option value="Flooring">Flooring</option>
+      <option value="Plumbing">🔧 Plumbing</option>
+      <option value="Electrical">⚡ Electrical</option>
+      <option value="Exterior">Exterior</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="add-row"><button onclick="openHouseModal()">+ Add Item</button></div>
+  <div class="count" id="h-count"></div>
+  <div id="h-list"></div>
+</div>
+
+<div class="overlay" id="house-modal">
+  <div class="modal" style="max-width:500px">
+    <h3 id="house-modal-title">Add House Item</h3>
+
+    <label>Item Name *</label><input id="h-name" placeholder="e.g. Living Room Paint">
+    <label>Category *</label>
+    <select id="h-category" onchange="toggleHouseFields()">
+      <option value="Paint">🎨 Paint</option>
+      <option value="Appliance">🔌 Appliance</option>
+      <option value="Construction">🧱 Construction</option>
+      <option value="Flooring">Flooring</option>
+      <option value="Plumbing">🔧 Plumbing</option>
+      <option value="Electrical">⚡ Electrical</option>
+      <option value="Exterior">Exterior</option>
+      <option value="Other">Other</option>
+    </select>
+    <label>Room / Location</label><input id="h-room" placeholder="e.g. Kitchen, Basement, Exterior">
+    <label>Date Installed / Purchased</label><input id="h-date" type="date">
+    <label>Condition</label>
+    <select id="h-condition">
+      <option value="New">New</option>
+      <option value="Good">Good</option>
+      <option value="Needs Repair">Needs Repair</option>
+      <option value="Replaced">Replaced</option>
+    </select>
+    <label>Status</label>
+    <select id="h-status">
+      <option value="Active">Active</option>
+      <option value="Needs Repair">Needs Repair</option>
+      <option value="Replaced">Replaced</option>
+    </select>
+    <label>Priority</label>
+    <select id="h-priority">
+      <option value="Low">Low</option>
+      <option value="Medium" selected>Medium</option>
+      <option value="High">High</option>
+    </select>
+    <label>Cost ($)</label><input id="h-cost" type="number" step="0.01" placeholder="0.00">
+    <label>Store / Vendor</label><input id="h-store" placeholder="e.g. Home Depot, contractor name">
+    <label>Tags</label><input id="h-tags" placeholder="e.g. renovation-2025, kitchen, urgent">
+    <label>Notes</label><input id="h-notes" placeholder="Details...">
+
+    <div id="paint-fields" class="cat-fields">
+      <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">🎨 Paint Details</div>
+      <label>Brand</label><input id="h-paint-brand" placeholder="e.g. Benjamin Moore">
+      <label>Color Name</label><input id="h-paint-color" placeholder="e.g. Revere Pewter">
+      <label>Color Code</label><input id="h-paint-code" placeholder="e.g. HC-172">
+      <label>Finish</label>
+      <select id="h-paint-finish">
+        <option value="">—</option><option>Matte</option><option>Eggshell</option><option>Satin</option><option>Semi-gloss</option><option>Gloss</option>
+      </select>
+      <label>Paint Type</label>
+      <select id="h-paint-type">
+        <option value="">—</option><option>Latex</option><option>Oil-based</option><option>Primer</option>
+      </select>
+      <label>Quantity Used</label><input id="h-paint-qty" placeholder="e.g. 2 gallons">
+      <label>Coats Applied</label><input id="h-paint-coats" type="number" placeholder="2">
+      <label>Surface Type</label><input id="h-paint-surface" placeholder="e.g. Drywall, wood, concrete">
+      <label>Last Touched Up</label><input id="h-paint-touchup" type="date">
+    </div>
+
+    <div id="appliance-fields" class="cat-fields" style="display:none">
+      <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">🔌 Appliance Details</div>
+      <label>Brand</label><input id="h-app-brand" placeholder="e.g. Samsung, LG">
+      <label>Model Number</label><input id="h-app-model" placeholder="Model #">
+      <label>Serial Number</label><input id="h-app-serial" placeholder="Serial #">
+      <label>Warranty Expiry</label><input id="h-app-warranty" type="date">
+      <label>Maintenance Schedule</label><input id="h-app-maint" placeholder="e.g. Clean filter every 3 months">
+    </div>
+
+    <div id="construction-fields" class="cat-fields" style="display:none">
+      <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">🧱 Construction Details</div>
+      <label>Material Type</label><input id="h-con-material" placeholder="e.g. Concrete, mortar, sealant">
+      <label>Product Name</label><input id="h-con-product" placeholder="Product name">
+      <label>Mix Ratio</label><input id="h-con-mix" placeholder="If applicable">
+      <label>Application Method</label><input id="h-con-method" placeholder="How it was applied">
+      <label>Contractor vs DIY</label>
+      <select id="h-con-who"><option value="">—</option><option>DIY</option><option>Contractor</option></select>
+      <label>Warranty Info</label><input id="h-con-warranty" placeholder="Warranty details">
+    </div>
+
+    <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">📷 Photos</div>
+    <label>Add Photo</label><input type="file" id="h-photo-input" accept="image/*" multiple onchange="previewHousePhotos()" style="font-size:13px">
+    <div id="h-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+
+    <div class="actions">
+      <button class="secondary" onclick="closeHouseModal()">Cancel</button>
+      <button class="primary" onclick="saveHouseItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="maint-modal">
+  <div class="modal">
+    <h3 id="maint-modal-title">Maintenance Log</h3>
+    <div id="maint-list" style="margin-bottom:14px"></div>
+    <div style="border-top:1px solid #333;margin:10px 0;padding-top:10px;font-size:13px;color:#ff6b6b">Add Entry</div>
+    <label>Type</label>
+    <select id="mt-type"><option>Cleaning</option><option>Repair</option><option>Replacement</option><option>Inspection</option><option>Other</option></select>
+    <label>Date</label><input id="mt-date" type="date">
+    <label>Next Due</label><input id="mt-next" type="date">
+    <label>Cost ($)</label><input id="mt-cost" type="number" step="0.01" placeholder="0.00">
+    <label>Who Did It</label>
+    <select id="mt-who"><option>Me</option><option>Contractor</option></select>
+    <label>Notes</label><input id="mt-notes" placeholder="Details...">
+    <div class="actions">
+      <button class="secondary" onclick="closeMaintModal()">Close</button>
+      <button class="primary" onclick="addMaintEntry()">Add Entry</button>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="rest-modal">
@@ -134,5 +289,6 @@ h2{margin-bottom:16px;font-size:22px}
 <script src="db.js"></script>
 <script src="defaults.js"></script>
 <script src="app.js"></script>
+<script src="house.js"></script>
 </body>
 </html>

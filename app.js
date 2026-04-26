@@ -189,5 +189,6 @@ async function init() {
   }
   renderRestaurants();
   renderMovies();
+  if (typeof renderHouse === 'function') renderHouse();
 }
 init();

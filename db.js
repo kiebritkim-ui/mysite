@@ -14,7 +14,7 @@ async function dbSet(path, data) {
 }
 
 // Cache in memory, sync to/from Firebase
-let DATA = { restaurants: [], movies: [], events: [] };
+let DATA = { restaurants: [], movies: [], events: [], house: [] };
 
 async function loadAll() {
   const d = await dbGet('');
@@ -22,6 +22,7 @@ async function loadAll() {
     DATA.restaurants = d.restaurants || [];
     DATA.movies = d.movies || [];
     DATA.events = d.events || [];
+    DATA.house = d.house || [];
   }
 }
 
