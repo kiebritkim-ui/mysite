@@ -226,23 +226,51 @@ function parseImportItems() {
       if (items.length) items[items.length - 1].details.push(line);
     }
   });
-  // Merge details into notes
+  // Smart field extraction from details
   items.forEach(item => {
-    const allNotes = [item.notes, ...item.details].filter(Boolean).join(' | ');
-    item.notes = allNotes;
-    // Extract URL from details if not already found
-    if (!item.url) {
-      for (const d of item.details) {
-        const m = d.match(/(https?:\/\/\S+)/);
-        if (m) { item.url = m[1]; break; }
+    const all = [item.notes, ...item.details].filter(Boolean);
+    item.url = ''; item.cost = ''; item.store = ''; item.phone = '';
+    item.email = ''; item.date = ''; item.brand = ''; item.model = '';
+    item.serial = ''; item.warranty = '';
+    const leftover = [];
+
+    all.forEach(line => {
+      // URL
+      const urlM = line.match(/(https?:\/\/\S+)/);
+      if (urlM && !item.url) { item.url = urlM[1]; line = line.replace(urlM[1], '').trim(); }
+      // Email
+      const emM = line.match(/([\w.-]+@[\w.-]+\.\w+)/);
+      if (emM) { item.email = emM[1]; line = line.replace(emM[1], '').trim(); }
+      // Phone
+      const phM = line.match(/(\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/);
+      if (phM) { item.phone = phM[1]; line = line.replace(phM[1], '').trim(); }
+      // Cost/Price
+      const costM = line.match(/\$(\d[\d,.]*)/);
+      if (costM && !item.cost) { item.cost = costM[1].replace(/,/g, ''); }
+      // Date (YYYY-MM-DD or Month Day, Year or DD/MM/YYYY)
+      const dateM = line.match(/(\d{4}-\d{2}-\d{2})/);
+      if (dateM && !item.date) { item.date = dateM[1]; line = line.replace(dateM[1], '').trim(); }
+      // Key: value extraction
+      const kvM = line.match(/^(brand|model|serial|warranty|room|location|material|product)\s*[:=]\s*(.+)$/i);
+      if (kvM) {
+        const key = kvM[1].toLowerCase(), val = kvM[2].trim();
+        if (key === 'brand') item.brand = val;
+        else if (key === 'model') item.model = val;
+        else if (key === 'serial') item.serial = val;
+        else if (key === 'warranty') item.warranty = val;
+        else if (key === 'room' || key === 'location') item.room = val;
+        else if (key === 'material') item.material = val;
+        else if (key === 'product') item.product = val;
+        return;
       }
-    }
-    // Extract cost from details
-    item.cost = '';
-    for (const d of item.details) {
-      const m = d.match(/\$(\d[\d,.]*)/);
-      if (m) { item.cost = m[1].replace(/,/g, ''); break; }
-    }
+      // Anything remaining goes to leftover notes
+      if (line.trim()) leftover.push(line.trim());
+    });
+
+    // Build store/vendor from email + phone
+    const storeParts = [item.email, item.phone].filter(Boolean);
+    item.store = storeParts.join(' | ');
+    item.notes = leftover.join(' | ');
   });
   return items;
 }
@@ -257,6 +285,7 @@ async function runImport() {
     items.forEach(item => {
       if (existing.has(item.name.toLowerCase())) return;
       existing.add(item.name.toLowerCase());
+      const storeParts = [item.store, item.phone].filter(Boolean);
       DATA.restaurants.push({name: item.name, location:'', type:'', comments: item.notes, url: item.url});
       added++;
     });
@@ -279,7 +308,17 @@ async function runImport() {
     items.forEach(item => {
       if (existing.has(item.name.toLowerCase())) return;
       existing.add(item.name.toLowerCase());
-      DATA.house.push({name: item.name, category:'Other', room:'', date:'', condition:'New', status:'Active', priority:'Medium', cost: item.cost, store:'', tags:'', notes: item.notes, photos:[], maintenance:[]});
+      const entry = {name: item.name, category:'Other', room: item.room||'', date: item.date||'', condition:'New', status:'Active', priority:'Medium', cost: item.cost, store: item.store, tags:'', notes: item.notes, photos:[], maintenance:[]};
+      // Appliance fields
+      if (item.brand) entry.app_brand = item.brand;
+      if (item.model) { entry.app_model = item.model; entry.category = 'Appliance'; }
+      if (item.serial) { entry.app_serial = item.serial; entry.category = 'Appliance'; }
+      if (item.warranty) entry.app_warranty = item.warranty;
+      if (item.brand && entry.category === 'Appliance') entry.app_brand = item.brand;
+      // Construction fields
+      if (item.material) { entry.con_material = item.material; entry.category = 'Construction'; }
+      if (item.product) entry.con_product = item.product;
+      DATA.house.push(entry);
       added++;
     });
     await saveKey('house');
