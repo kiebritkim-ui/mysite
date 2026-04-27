@@ -2,6 +2,30 @@
 let houseEditIndex = -1;
 let housePhotos = []; // temp array for photo base64 during add/edit
 let maintItemIndex = -1;
+let lbPhotos = [];
+let lbIndex = 0;
+
+// --- LIGHTBOX ---
+function openLightbox(photos, index) {
+  lbPhotos = photos;
+  lbIndex = index || 0;
+  showLightboxPhoto();
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && e.target !== document.getElementById('lb-img')) return;
+  document.getElementById('lightbox').classList.remove('show');
+}
+function navLightbox(dir) {
+  lbIndex = (lbIndex + dir + lbPhotos.length) % lbPhotos.length;
+  showLightboxPhoto();
+}
+function showLightboxPhoto() {
+  document.getElementById('lb-img').src = lbPhotos[lbIndex];
+  document.getElementById('lb-count').textContent = lbPhotos.length > 1 ? `${lbIndex + 1} / ${lbPhotos.length}` : '';
+  document.querySelector('.lb-prev').style.display = lbPhotos.length > 1 ? '' : 'none';
+  document.querySelector('.lb-next').style.display = lbPhotos.length > 1 ? '' : 'none';
+}
 
 function toggleHouseFields() {
   const cat = document.getElementById('h-category').value;
@@ -32,7 +56,7 @@ function renderHouse() {
     const maintCount = (h.maintenance || []).length;
     let photosHtml = '';
     if (h.photos && h.photos.length) {
-      photosHtml = '<div class="h-photos">' + h.photos.map(p => `<img src="${p}" alt="photo">`).join('') + '</div>';
+      photosHtml = '<div class="h-photos" onclick="event.stopPropagation()">' + h.photos.map((p, pi) => `<img src="${p}" alt="photo" onclick="openLightbox(DATA.house[${h._i}].photos,${pi})">`).join('') + '</div>';
     }
     return `<div class="h-card" onclick="editHouseItem(${h._i})">
       <div class="h-top">
@@ -170,7 +194,7 @@ function renderPhotoPreview() {
   const el = document.getElementById('h-photo-preview');
   el.innerHTML = housePhotos.map((p, i) =>
     `<div style="position:relative;display:inline-block">
-      <img src="${p}" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid #333">
+      <img src="${p}" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid #333;cursor:pointer" onclick="openLightbox(housePhotos,${i})">
       <button onclick="housePhotos.splice(${i},1);renderPhotoPreview()" style="position:absolute;top:-4px;right:-4px;background:#ff6b6b;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;line-height:18px;padding:0">×</button>
     </div>`
   ).join('');
