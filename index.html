@@ -90,7 +90,7 @@ h2{margin-bottom:16px;font-size:22px}
 <div id="restaurants" class="section active">
   <h2>Ottawa Restaurants</h2>
   <div class="search-row"><input id="r-search" placeholder="Search restaurants..." oninput="renderRestaurants()"></div>
-  <div class="add-row"><button onclick="openRestModal()">+ Add Restaurant</button></div>
+  <div class="add-row"><button onclick="openRestModal()">+ Add Restaurant</button><button onclick="openImportModal('restaurants')" style="background:#2a2a2a;color:#aaa">📋 Import</button></div>
   <div class="count" id="r-count"></div>
   <div id="r-list"></div>
 </div>
@@ -101,6 +101,7 @@ h2{margin-bottom:16px;font-size:22px}
     <input id="m-title" placeholder="Movie title">
     <input id="m-genre" placeholder="Genre" style="max-width:130px">
     <button onclick="addMovie()">Add</button>
+    <button onclick="openImportModal('movies')" style="background:#2a2a2a;color:#aaa;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-size:14px">📋 Import</button>
   </div>
   <div id="m-list"></div>
 </div>
@@ -133,7 +134,7 @@ h2{margin-bottom:16px;font-size:22px}
       <option value="Other">Other</option>
     </select>
   </div>
-  <div class="add-row"><button onclick="openHouseModal()">+ Add Item</button></div>
+  <div class="add-row"><button onclick="openHouseModal()">+ Add Item</button><button onclick="openImportModal('house')" style="background:#2a2a2a;color:#aaa">📋 Import</button></div>
   <div class="count" id="h-count"></div>
   <div id="h-list"></div>
 </div>
@@ -282,6 +283,19 @@ h2{margin-bottom:16px;font-size:22px}
     <div class="actions">
       <button class="secondary" onclick="closeEventModal()">Cancel</button>
       <button class="primary" onclick="addEvent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="import-modal">
+  <div class="modal" style="max-width:500px">
+    <h3 id="import-modal-title">Bulk Import</h3>
+    <p style="font-size:13px;color:#888;margin-bottom:10px">Paste your list below — one item per line. URLs and notes after a dash will be captured. Empty lines and duplicates are skipped.</p>
+    <textarea id="import-text" rows="12" placeholder="Paste from Notes, OneDrive, etc..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#0f0f0f;color:#e0e0e0;font-size:14px;resize:vertical;font-family:inherit"></textarea>
+    <div id="import-preview" style="font-size:13px;color:#888;margin-top:8px"></div>
+    <div class="actions">
+      <button class="secondary" onclick="closeImportModal()">Cancel</button>
+      <button class="primary" onclick="runImport()">Import</button>
     </div>
   </div>
 </div>

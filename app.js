@@ -175,6 +175,89 @@ async function addEvent() {
   renderCalendar();
 }
 
+// --- BULK IMPORT ---
+let importTarget = '';
+
+function openImportModal(target) {
+  importTarget = target;
+  const labels = {restaurants:'Restaurants',movies:'Movies',house:'House Items'};
+  document.getElementById('import-modal-title').textContent = `📋 Import ${labels[target]}`;
+  document.getElementById('import-text').value = '';
+  document.getElementById('import-preview').textContent = '';
+  document.getElementById('import-modal').classList.add('show');
+  document.getElementById('import-text').oninput = () => {
+    const lines = parseImportLines();
+    document.getElementById('import-preview').textContent = lines.length ? `${lines.length} items detected` : '';
+  };
+}
+
+function closeImportModal() { document.getElementById('import-modal').classList.remove('show'); }
+
+function parseImportLines() {
+  const raw = document.getElementById('import-text').value;
+  return raw.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^#+$/) && !l.match(/^[-=]+$/));
+}
+
+async function runImport() {
+  const lines = parseImportLines();
+  if (!lines.length) return;
+  let added = 0;
+
+  if (importTarget === 'restaurants') {
+    const existing = new Set(DATA.restaurants.map(r => r.name.toLowerCase()));
+    lines.forEach(line => {
+      // Skip bare URLs
+      if (line.match(/^https?:\/\//)) return;
+      let name = line, url = '', comments = '';
+      // "Name - comment" pattern
+      const dashMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+      if (dashMatch) { name = dashMatch[1]; comments = dashMatch[2]; }
+      name = name.replace(/^[-*•]\s*/, '').trim();
+      if (!name || existing.has(name.toLowerCase())) return;
+      existing.add(name.toLowerCase());
+      DATA.restaurants.push({name, location:'', type:'', comments, url});
+      added++;
+    });
+    await saveKey('restaurants');
+    renderRestaurants();
+  }
+  else if (importTarget === 'movies') {
+    const existing = new Set(DATA.movies.map(m => m.title.toLowerCase()));
+    lines.forEach(line => {
+      if (line.match(/^https?:\/\//)) return;
+      let title = line, genre = '';
+      const dashMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+      if (dashMatch) { title = dashMatch[1]; genre = dashMatch[2]; }
+      title = title.replace(/^[-*•]\s*/, '').trim();
+      if (!title || existing.has(title.toLowerCase())) return;
+      existing.add(title.toLowerCase());
+      DATA.movies.push({title, genre});
+      added++;
+    });
+    await saveKey('movies');
+    renderMovies();
+  }
+  else if (importTarget === 'house') {
+    const existing = new Set(DATA.house.map(h => h.name.toLowerCase()));
+    lines.forEach(line => {
+      if (line.match(/^https?:\/\//)) return;
+      let name = line, notes = '';
+      const dashMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+      if (dashMatch) { name = dashMatch[1]; notes = dashMatch[2]; }
+      name = name.replace(/^[-*•]\s*/, '').trim();
+      if (!name || existing.has(name.toLowerCase())) return;
+      existing.add(name.toLowerCase());
+      DATA.house.push({name, category:'Other', room:'', date:'', condition:'New', status:'Active', priority:'Medium', cost:'', store:'', tags:'', notes, photos:[], maintenance:[]});
+      added++;
+    });
+    await saveKey('house');
+    if (typeof renderHouse === 'function') renderHouse();
+  }
+
+  closeImportModal();
+  alert(`Imported ${added} items. Tap any item to edit and add details.`);
+}
+
 // --- INIT ---
 async function init() {
   await loadAll();
