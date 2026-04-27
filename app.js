@@ -196,11 +196,12 @@ function closeImportModal() { document.getElementById('import-modal').classList.
 // Detect if a line is a detail (not a new item name)
 function isDetailLine(line) {
   if (/^https?:\/\//i.test(line)) return true;
-  if (/^(price|cost|quote|total|warranty|model|serial|brand|phone|email|address|note)s?\s*[:=#]/i.test(line)) return true;
+  if (/^(price|cost|quote|total|warranty|model|serial|brand|phone|email|address|note|invoice|order|ref|receipt|amount|paid|balance|estimate|vendor|contractor|contact|purchased|installed|delivered)/i.test(line)) return true;
   if (/^\$\d/.test(line)) return true;
-  if (/^\d{1,3}[-.]\d{3}[-.]\d{4}/.test(line)) return true;
+  if (/\d{1,3}[-.]\d{3}[-.]\d{4}/.test(line)) return true;
   if (/^[\w.-]+@[\w.-]+\.\w+/.test(line)) return true;
   if (/^\d+\s*(per|each|for|x)\s/i.test(line)) return true;
+  if (/^#\d+/.test(line)) return true;
   return false;
 }
 
