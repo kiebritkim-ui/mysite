@@ -267,8 +267,8 @@ function parseImportItems() {
       if (line.trim()) leftover.push(line.trim());
     });
 
-    // Build store/vendor from email + phone
-    const storeParts = [item.email, item.phone].filter(Boolean);
+    // Build store/vendor from email + phone + url
+    const storeParts = [item.email, item.phone, item.url].filter(Boolean);
     item.store = storeParts.join(' | ');
     item.notes = leftover.join(' | ');
   });
