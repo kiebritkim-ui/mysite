@@ -186,36 +186,77 @@ function openImportModal(target) {
   document.getElementById('import-preview').textContent = '';
   document.getElementById('import-modal').classList.add('show');
   document.getElementById('import-text').oninput = () => {
-    const lines = parseImportLines();
-    document.getElementById('import-preview').textContent = lines.length ? `${lines.length} items detected` : '';
+    const items = parseImportItems();
+    document.getElementById('import-preview').textContent = items.length ? `${items.length} item${items.length>1?'s':''} detected` : '';
   };
 }
 
 function closeImportModal() { document.getElementById('import-modal').classList.remove('show'); }
 
-function parseImportLines() {
+// Detect if a line is a detail (not a new item name)
+function isDetailLine(line) {
+  if (/^https?:\/\//i.test(line)) return true;
+  if (/^(price|cost|quote|total|warranty|model|serial|brand|phone|email|address|note)s?\s*[:=#]/i.test(line)) return true;
+  if (/^\$\d/.test(line)) return true;
+  if (/^\d{1,3}[-.]\d{3}[-.]\d{4}/.test(line)) return true;
+  if (/^[\w.-]+@[\w.-]+\.\w+/.test(line)) return true;
+  if (/^\d+\s*(per|each|for|x)\s/i.test(line)) return true;
+  return false;
+}
+
+// Group pasted text into items: name line + following detail lines merged into notes
+function parseImportItems() {
   const raw = document.getElementById('import-text').value;
-  return raw.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^#+$/) && !l.match(/^[-=]+$/));
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^#+$/) && !l.match(/^[-=]+$/));
+  const items = [];
+  lines.forEach(line => {
+    if (!items.length || !isDetailLine(line)) {
+      // New item — extract URL or email if embedded in the name line
+      let name = line, notes = '', url = '';
+      const urlMatch = line.match(/(https?:\/\/\S+)/);
+      if (urlMatch) { url = urlMatch[1]; name = line.replace(urlMatch[1], '').trim(); }
+      const emailMatch = name.match(/([\w.-]+@[\w.-]+\.\w+)/);
+      if (emailMatch) { notes = emailMatch[1]; name = name.replace(emailMatch[1], '').trim(); }
+      name = name.replace(/^[-*•]\s*/, '').replace(/[,\s]+$/, '').trim();
+      if (name) items.push({name, url, notes, details: []});
+      else if (items.length) items[items.length - 1].details.push(line);
+    } else {
+      // Detail line — attach to previous item
+      if (items.length) items[items.length - 1].details.push(line);
+    }
+  });
+  // Merge details into notes
+  items.forEach(item => {
+    const allNotes = [item.notes, ...item.details].filter(Boolean).join(' | ');
+    item.notes = allNotes;
+    // Extract URL from details if not already found
+    if (!item.url) {
+      for (const d of item.details) {
+        const m = d.match(/(https?:\/\/\S+)/);
+        if (m) { item.url = m[1]; break; }
+      }
+    }
+    // Extract cost from details
+    item.cost = '';
+    for (const d of item.details) {
+      const m = d.match(/\$(\d[\d,.]*)/);
+      if (m) { item.cost = m[1].replace(/,/g, ''); break; }
+    }
+  });
+  return items;
 }
 
 async function runImport() {
-  const lines = parseImportLines();
-  if (!lines.length) return;
+  const items = parseImportItems();
+  if (!items.length) return;
   let added = 0;
 
   if (importTarget === 'restaurants') {
     const existing = new Set(DATA.restaurants.map(r => r.name.toLowerCase()));
-    lines.forEach(line => {
-      // Skip bare URLs
-      if (line.match(/^https?:\/\//)) return;
-      let name = line, url = '', comments = '';
-      // "Name - comment" pattern
-      const dashMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-      if (dashMatch) { name = dashMatch[1]; comments = dashMatch[2]; }
-      name = name.replace(/^[-*•]\s*/, '').trim();
-      if (!name || existing.has(name.toLowerCase())) return;
-      existing.add(name.toLowerCase());
-      DATA.restaurants.push({name, location:'', type:'', comments, url});
+    items.forEach(item => {
+      if (existing.has(item.name.toLowerCase())) return;
+      existing.add(item.name.toLowerCase());
+      DATA.restaurants.push({name: item.name, location:'', type:'', comments: item.notes, url: item.url});
       added++;
     });
     await saveKey('restaurants');
@@ -223,15 +264,10 @@ async function runImport() {
   }
   else if (importTarget === 'movies') {
     const existing = new Set(DATA.movies.map(m => m.title.toLowerCase()));
-    lines.forEach(line => {
-      if (line.match(/^https?:\/\//)) return;
-      let title = line, genre = '';
-      const dashMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-      if (dashMatch) { title = dashMatch[1]; genre = dashMatch[2]; }
-      title = title.replace(/^[-*•]\s*/, '').trim();
-      if (!title || existing.has(title.toLowerCase())) return;
-      existing.add(title.toLowerCase());
-      DATA.movies.push({title, genre});
+    items.forEach(item => {
+      if (existing.has(item.name.toLowerCase())) return;
+      existing.add(item.name.toLowerCase());
+      DATA.movies.push({title: item.name, genre: item.notes});
       added++;
     });
     await saveKey('movies');
@@ -239,15 +275,10 @@ async function runImport() {
   }
   else if (importTarget === 'house') {
     const existing = new Set(DATA.house.map(h => h.name.toLowerCase()));
-    lines.forEach(line => {
-      if (line.match(/^https?:\/\//)) return;
-      let name = line, notes = '';
-      const dashMatch = line.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-      if (dashMatch) { name = dashMatch[1]; notes = dashMatch[2]; }
-      name = name.replace(/^[-*•]\s*/, '').trim();
-      if (!name || existing.has(name.toLowerCase())) return;
-      existing.add(name.toLowerCase());
-      DATA.house.push({name, category:'Other', room:'', date:'', condition:'New', status:'Active', priority:'Medium', cost:'', store:'', tags:'', notes, photos:[], maintenance:[]});
+    items.forEach(item => {
+      if (existing.has(item.name.toLowerCase())) return;
+      existing.add(item.name.toLowerCase());
+      DATA.house.push({name: item.name, category:'Other', room:'', date:'', condition:'New', status:'Active', priority:'Medium', cost: item.cost, store:'', tags:'', notes: item.notes, photos:[], maintenance:[]});
       added++;
     });
     await saveKey('house');
