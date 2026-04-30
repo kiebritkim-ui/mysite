@@ -345,4 +345,3 @@ async function init() {
   renderMovies();
   if (typeof renderHouse === 'function') renderHouse();
 }
-init();

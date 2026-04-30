@@ -1,20 +1,62 @@
-const DB_URL = 'https://mysite-7f3e9-default-rtdb.firebaseio.com';
+const firebaseConfig = {
+  apiKey: "AIzaSyCTRzCyEZQ6iIAwVWKODtpZxgyDnvyzpAo",
+  authDomain: "mysite-7f3e9.firebaseapp.com",
+  databaseURL: "https://mysite-7f3e9-default-rtdb.firebaseio.com",
+  projectId: "mysite-7f3e9",
+  storageBucket: "mysite-7f3e9.firebasestorage.app",
+  messagingSenderId: "940204190251",
+  appId: "1:940204190251:web:53158dfb7fdbbfab57986e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+let DATA = { restaurants: [], movies: [], events: [], house: [] };
+let authToken = null;
+
+// --- Auth ---
+function signIn() {
+  auth.signInWithPopup(provider).catch(err => {
+    alert('Sign-in failed: ' + err.message);
+  });
+}
+
+function signOut() {
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    authToken = await user.getIdToken();
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = '';
+    document.getElementById('user-info').textContent = user.displayName || user.email;
+    await init();
+  } else {
+    authToken = null;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+// --- Database (REST with auth token) ---
+const DB_URL = firebaseConfig.databaseURL;
 
 async function dbGet(path) {
-  const r = await fetch(`${DB_URL}/${path}.json`);
+  const r = await fetch(`${DB_URL}/${path}.json?auth=${authToken}`);
+  if (!r.ok) throw new Error('DB read failed');
   return await r.json();
 }
 
 async function dbSet(path, data) {
-  await fetch(`${DB_URL}/${path}.json`, {
+  const r = await fetch(`${DB_URL}/${path}.json?auth=${authToken}`, {
     method: 'PUT',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
   });
+  if (!r.ok) throw new Error('DB write failed');
 }
-
-// Cache in memory, sync to/from Firebase
-let DATA = { restaurants: [], movies: [], events: [], house: [] };
 
 async function loadAll() {
   const d = await dbGet('');
