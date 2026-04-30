@@ -30,9 +30,14 @@ auth.onAuthStateChanged(async user => {
   if (user) {
     authToken = await user.getIdToken();
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app').style.display = '';
+    document.getElementById('app').style.display = 'block';
     document.getElementById('user-info').textContent = user.displayName || user.email;
-    await init();
+    try {
+      await init();
+    } catch(e) {
+      console.error('Init error:', e);
+      alert('Error loading data: ' + e.message);
+    }
   } else {
     authToken = null;
     document.getElementById('login-screen').style.display = 'flex';
