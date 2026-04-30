@@ -1,10 +1,24 @@
-// --- Tab switching ---
+// --- Sidebar & Tab switching ---
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+
 function showTab(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelector(`nav button[onclick="showTab('${id}')"]`).classList.add('active');
+  const btn = document.querySelector(`.sidebar button[onclick="showTab('${id}')"]`);
+  if (btn) btn.classList.add('active');
+  const titles = {dashboard:'Dashboard',finance:'Finance',restaurants:'Restaurants',movies:'Movies',house:'House',calendar:'Calendar',documents:'Documents'};
+  document.getElementById('page-title').textContent = titles[id] || id;
   if (id === 'calendar') renderCalendar();
+  if (id === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
+  if (id === 'finance' && typeof renderBills === 'function') renderBills();
+  if (id === 'documents' && typeof renderDocs === 'function') renderDocs();
+  // Close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
 }
 
 // --- RESTAURANTS ---
@@ -344,4 +358,7 @@ async function init() {
   renderRestaurants();
   renderMovies();
   if (typeof renderHouse === 'function') renderHouse();
+  if (typeof renderDashboard === 'function') renderDashboard();
+  if (typeof renderBills === 'function') renderBills();
+  if (typeof renderDocs === 'function') renderDocs();
 }

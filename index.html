@@ -6,101 +6,9 @@
 <title>My Ottawa Life</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0f0f0f;color:#e0e0e0;min-height:100vh}
-#login-screen{display:flex;justify-content:center;align-items:center;min-height:100vh;flex-direction:column;gap:16px}
-#login-screen h1{font-size:28px}
-#login-screen p{color:#888;font-size:14px}
-#login-screen button{padding:14px 28px;border-radius:8px;border:none;background:#fff;color:#333;font-size:16px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:10px}
-#login-screen button:hover{background:#eee}
-#app{display:none}
-.user-bar{display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:6px 14px;background:#111;font-size:12px;color:#666}
-.user-bar button{background:none;border:none;color:#888;cursor:pointer;font-size:12px;text-decoration:underline}
-.user-bar button:hover{color:#ff6b6b}
-nav{display:flex;gap:0;background:#1a1a1a;border-bottom:1px solid #333;position:sticky;top:0;z-index:10}
-nav button{flex:1;padding:14px;background:none;border:none;color:#888;font-size:15px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s}
-nav button.active{color:#fff;border-bottom-color:#ff6b6b}
-.section{display:none;max-width:700px;margin:0 auto;padding:20px}
-.section.active{display:block}
-h2{margin-bottom:16px;font-size:22px}
-.add-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.add-row input,.add-row select{padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:14px}
-.add-row input{flex:1;min-width:120px}
-.add-row select{min-width:100px}
-.add-row button,.modal button.primary{padding:10px 18px;border-radius:8px;border:none;background:#ff6b6b;color:#fff;cursor:pointer;font-size:14px;white-space:nowrap}
-.add-row button:hover,.modal button.primary:hover{background:#ff5252}
-.card{background:#1a1a1a;border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;border:1px solid #262626}
-.card .info{flex:1}
-.card .info .name{font-weight:600}
-.card .info .name a{color:#ff6b6b;text-decoration:none}
-.card .info .name a:hover{text-decoration:underline}
-.card .info .meta{font-size:13px;color:#888;margin-top:2px}
-.card .info .comment{font-size:13px;color:#aaa;margin-top:4px;font-style:italic}
-.card .del{background:none;border:none;color:#555;font-size:20px;cursor:pointer;padding:0 4px;margin-left:8px;flex-shrink:0}
-.card .del:hover{color:#ff6b6b}
-.empty{text-align:center;color:#555;padding:40px 0}
-.search-row{margin-bottom:14px}
-.search-row input{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:14px}
-.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.cal-header button{background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;padding:4px 10px}
-.cal-header button:hover{color:#fff}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:20px}
-.cal-grid .day-label{text-align:center;font-size:12px;color:#666;padding:6px 0}
-.cal-grid .day{text-align:center;padding:10px 4px;border-radius:8px;cursor:pointer;font-size:14px;position:relative}
-.cal-grid .day:hover{background:#262626}
-.cal-grid .day.today{background:#2a2a2a;font-weight:700}
-.cal-grid .day.has-event::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#ff6b6b}
-.cal-grid .day.empty-day{cursor:default}
-.cal-grid .day.empty-day:hover{background:none}
-.upcoming h3{font-size:16px;margin-bottom:10px;color:#aaa}
-.event-card{background:#1a1a1a;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid #262626}
-.event-card .meta{font-size:13px;color:#888;margin-top:2px}
-.event-card .recur{font-size:11px;background:#2a2a2a;color:#ff6b6b;padding:2px 8px;border-radius:10px;flex-shrink:0}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;justify-content:center;align-items:center}
-.overlay.show{display:flex}
-.modal{background:#1a1a1a;border-radius:14px;padding:24px;width:90%;max-width:440px;border:1px solid #333;max-height:90vh;overflow-y:auto}
-.modal h3{margin-bottom:16px}
-.modal label{display:block;font-size:13px;color:#888;margin:10px 0 4px}
-.modal input,.modal select{width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#0f0f0f;color:#e0e0e0;font-size:14px}
-.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
-.modal button.secondary{padding:10px 18px;border-radius:8px;border:1px solid #333;background:none;color:#aaa;cursor:pointer;font-size:14px}
-.count{font-size:13px;color:#555;margin-bottom:12px}
-.cat-fields{transition:.2s}
-.h-card{background:#1a1a1a;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid #262626;cursor:pointer}
-.h-card:hover{border-color:#444}
-.h-card .h-top{display:flex;justify-content:space-between;align-items:flex-start}
-.h-card .h-top .info{flex:1}
-.h-card .h-top .name{font-weight:600}
-.h-card .meta{font-size:13px;color:#888;margin-top:2px}
-.h-card .comment{font-size:13px;color:#aaa;margin-top:4px;font-style:italic}
-.h-card .h-tags{margin-top:6px}
-.h-tag{display:inline-block;font-size:11px;background:#2a2a2a;color:#ccc;padding:2px 8px;border-radius:10px;margin-right:4px}
-.h-tag.cat{color:#ff6b6b}
-.h-tag.priority-High{color:#ff4444}
-.h-tag.priority-Low{color:#66bb6a}
-.h-card .h-photos{display:flex;gap:4px;margin-top:8px;overflow-x:auto}
-.h-card .h-photos img{width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #333}
-.h-actions{display:flex;gap:6px;flex-shrink:0;margin-left:8px}
-.h-actions button{background:none;border:none;color:#555;font-size:16px;cursor:pointer;padding:2px 4px}
-.h-actions button:hover{color:#ff6b6b}
-.maint-entry{background:#0f0f0f;border-radius:8px;padding:10px;margin-bottom:6px;font-size:13px;border:1px solid #262626;display:flex;justify-content:space-between;align-items:flex-start}
-.maint-entry .del{background:none;border:none;color:#555;cursor:pointer;font-size:16px}
-.maint-entry .del:hover{color:#ff6b6b}
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:30;justify-content:center;align-items:center;flex-direction:column}
-.lightbox.show{display:flex}
-.lightbox img{max-width:92vw;max-height:80vh;object-fit:contain;border-radius:8px}
-.lightbox .lb-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;z-index:31}
-.lightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:#fff;font-size:28px;cursor:pointer;padding:12px 16px;border-radius:8px}
-.lightbox .lb-nav:hover{background:rgba(255,255,255,.3)}
-.lightbox .lb-prev{left:10px}
-.lightbox .lb-next{right:10px}
-.lightbox .lb-count{color:#888;font-size:13px;margin-top:10px}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- Login Screen -->
 <div id="login-screen">
   <h1>🏠 My Ottawa Life</h1>
   <p>Sign in to access your data</p>
@@ -110,38 +18,116 @@ h2{margin-bottom:16px;font-size:22px}
   </button>
 </div>
 
-<!-- App (hidden until authenticated) -->
 <div id="app">
-<div class="user-bar"><span id="user-info"></span><button onclick="signOut()">Sign out</button></div>
+<!-- Top bar -->
+<div class="topbar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <span class="topbar-title" id="page-title">Dashboard</span>
+  <div class="user-bar"><span id="user-info"></span><button onclick="signOut()">Sign out</button></div>
+</div>
 
-<nav>
-  <button class="active" onclick="showTab('restaurants')">🍽 Restaurants</button>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">🏠 Life OS</div>
+  <button class="active" onclick="showTab('dashboard')">🧭 Dashboard</button>
+  <button onclick="showTab('finance')">💰 Finance</button>
+  <button onclick="showTab('restaurants')">🍽 Restaurants</button>
   <button onclick="showTab('movies')">🎬 Movies</button>
   <button onclick="showTab('house')">🏠 House</button>
   <button onclick="showTab('calendar')">📅 Calendar</button>
-</nav>
+  <button onclick="showTab('documents')">🧾 Documents</button>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<div id="restaurants" class="section active">
-  <h2>Ottawa Restaurants</h2>
+<!-- Main content -->
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <h2>🧭 Dashboard</h2>
+  <div class="dash-grid">
+    <div class="dash-card">
+      <div class="dash-label">Net Worth</div>
+      <div class="dash-value" id="dash-networth">—</div>
+      <div class="dash-sub" id="dash-nw-change"></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-label">Monthly Expenses</div>
+      <div class="dash-value" id="dash-expenses">—</div>
+      <div class="dash-sub" id="dash-bills-count"></div>
+    </div>
+  </div>
+  <h3 class="dash-section-title">⚠️ Bills Due Soon</h3>
+  <div id="dash-bills-due"></div>
+  <h3 class="dash-section-title">📅 Upcoming Events</h3>
+  <div id="dash-events"></div>
+</div>
+
+<!-- FINANCE -->
+<div id="finance" class="section">
+  <h2>💰 Finance</h2>
+  <div class="finance-tabs">
+    <button class="ft-active" onclick="showFinanceTab('bills')">Bills</button>
+    <button onclick="showFinanceTab('networth')">Net Worth</button>
+  </div>
+  <div id="finance-bills">
+    <div class="add-row"><button onclick="openBillModal()">+ Add Bill</button></div>
+    <div class="count" id="bill-count"></div>
+    <div id="bill-list"></div>
+  </div>
+  <div id="finance-networth" style="display:none">
+    <div class="add-row"><button onclick="openNWModal()">+ Log Snapshot</button></div>
+    <div id="nw-current" style="margin-bottom:14px"></div>
+    <div id="nw-history"></div>
+  </div>
+</div>
+
+<!-- RESTAURANTS -->
+<div id="restaurants" class="section">
+  <h2>🍽 Ottawa Restaurants</h2>
   <div class="search-row"><input id="r-search" placeholder="Search restaurants..." oninput="renderRestaurants()"></div>
-  <div class="add-row"><button onclick="openRestModal()">+ Add Restaurant</button><button onclick="openImportModal('restaurants')" style="background:#2a2a2a;color:#aaa">📋 Import</button></div>
+  <div class="add-row"><button onclick="openRestModal()">+ Add Restaurant</button><button onclick="openImportModal('restaurants')" class="btn-secondary">📋 Import</button></div>
   <div class="count" id="r-count"></div>
   <div id="r-list"></div>
 </div>
 
+<!-- MOVIES -->
 <div id="movies" class="section">
-  <h2>Movies to Watch</h2>
+  <h2>🎬 Movies to Watch</h2>
   <div class="add-row">
     <input id="m-title" placeholder="Movie title">
     <input id="m-genre" placeholder="Genre" style="max-width:130px">
     <button onclick="addMovie()">Add</button>
-    <button onclick="openImportModal('movies')" style="background:#2a2a2a;color:#aaa;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-size:14px">📋 Import</button>
+    <button onclick="openImportModal('movies')" class="btn-secondary">📋 Import</button>
   </div>
   <div id="m-list"></div>
 </div>
 
+<!-- HOUSE -->
+<div id="house" class="section">
+  <h2>🏠 House Tracker</h2>
+  <div class="search-row" style="display:flex;gap:8px">
+    <input id="h-search" placeholder="Search items..." oninput="renderHouse()" style="flex:1">
+    <select id="h-cat-filter" onchange="renderHouse()">
+      <option value="">All</option>
+      <option value="Paint">🎨 Paint</option>
+      <option value="Appliance">🔌 Appliance</option>
+      <option value="Construction">🧱 Construction</option>
+      <option value="Flooring">Flooring</option>
+      <option value="Plumbing">🔧 Plumbing</option>
+      <option value="Electrical">⚡ Electrical</option>
+      <option value="Exterior">Exterior</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="add-row"><button onclick="openHouseModal()">+ Add Item</button><button onclick="openImportModal('house')" class="btn-secondary">📋 Import</button></div>
+  <div class="count" id="h-count"></div>
+  <div id="h-list"></div>
+</div>
+
+<!-- CALENDAR -->
 <div id="calendar" class="section">
-  <h2>Recurring Events</h2>
+  <h2>📅 Recurring Events</h2>
   <div class="add-row"><button onclick="openEventModal()">+ Add Event</button></div>
   <div class="cal-header">
     <button onclick="changeMonth(-1)">‹</button>
@@ -152,88 +138,46 @@ h2{margin-bottom:16px;font-size:22px}
   <div class="upcoming" id="upcoming"></div>
 </div>
 
-<div id="house" class="section">
-  <h2>House Tracker</h2>
-  <div class="search-row" style="display:flex;gap:8px">
-    <input id="h-search" placeholder="Search items..." oninput="renderHouse()" style="flex:1">
-    <select id="h-cat-filter" onchange="renderHouse()" style="width:auto;padding:10px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#e0e0e0;font-size:14px">
-      <option value="">All Categories</option>
-      <option value="Paint">🎨 Paint</option>
-      <option value="Appliance">🔌 Appliance</option>
-      <option value="Construction">🧱 Construction</option>
-      <option value="Flooring">Flooring</option>
-      <option value="Plumbing">🔧 Plumbing</option>
-      <option value="Electrical">⚡ Electrical</option>
-      <option value="Exterior">Exterior</option>
-      <option value="Other">Other</option>
-    </select>
-  </div>
-  <div class="add-row"><button onclick="openHouseModal()">+ Add Item</button><button onclick="openImportModal('house')" style="background:#2a2a2a;color:#aaa">📋 Import</button></div>
-  <div class="count" id="h-count"></div>
-  <div id="h-list"></div>
+<!-- DOCUMENTS -->
+<div id="documents" class="section">
+  <h2>🧾 Documents</h2>
+  <div class="add-row"><button onclick="openDocModal()">+ Add Document</button></div>
+  <div id="doc-list"></div>
 </div>
 
+</div><!-- end .main -->
+
+<!-- MODALS -->
+<!-- House Modal -->
 <div class="overlay" id="house-modal">
   <div class="modal" style="max-width:500px">
     <h3 id="house-modal-title">Add House Item</h3>
-
     <label>Item Name *</label><input id="h-name" placeholder="e.g. Living Room Paint">
     <label>Category *</label>
     <select id="h-category" onchange="toggleHouseFields()">
-      <option value="Paint">🎨 Paint</option>
-      <option value="Appliance">🔌 Appliance</option>
-      <option value="Construction">🧱 Construction</option>
-      <option value="Flooring">Flooring</option>
-      <option value="Plumbing">🔧 Plumbing</option>
-      <option value="Electrical">⚡ Electrical</option>
-      <option value="Exterior">Exterior</option>
-      <option value="Other">Other</option>
+      <option value="Paint">🎨 Paint</option><option value="Appliance">🔌 Appliance</option><option value="Construction">🧱 Construction</option><option value="Flooring">Flooring</option><option value="Plumbing">🔧 Plumbing</option><option value="Electrical">⚡ Electrical</option><option value="Exterior">Exterior</option><option value="Other">Other</option>
     </select>
-    <label>Room / Location</label><input id="h-room" placeholder="e.g. Kitchen, Basement, Exterior">
+    <label>Room / Location</label><input id="h-room" placeholder="e.g. Kitchen, Basement">
     <label>Date Installed / Purchased</label><input id="h-date" type="date">
-    <label>Condition</label>
-    <select id="h-condition">
-      <option value="New">New</option>
-      <option value="Good">Good</option>
-      <option value="Needs Repair">Needs Repair</option>
-      <option value="Replaced">Replaced</option>
-    </select>
-    <label>Status</label>
-    <select id="h-status">
-      <option value="Active">Active</option>
-      <option value="Needs Repair">Needs Repair</option>
-      <option value="Replaced">Replaced</option>
-    </select>
-    <label>Priority</label>
-    <select id="h-priority">
-      <option value="Low">Low</option>
-      <option value="Medium" selected>Medium</option>
-      <option value="High">High</option>
-    </select>
+    <label>Condition</label><select id="h-condition"><option value="New">New</option><option value="Good">Good</option><option value="Needs Repair">Needs Repair</option><option value="Replaced">Replaced</option></select>
+    <label>Status</label><select id="h-status"><option value="Active">Active</option><option value="Needs Repair">Needs Repair</option><option value="Replaced">Replaced</option></select>
+    <label>Priority</label><select id="h-priority"><option value="Low">Low</option><option value="Medium" selected>Medium</option><option value="High">High</option></select>
     <label>Cost ($)</label><input id="h-cost" type="number" step="0.01" placeholder="0.00">
-    <label>Store / Vendor</label><input id="h-store" placeholder="e.g. Home Depot, contractor name">
-    <label>Tags</label><input id="h-tags" placeholder="e.g. renovation-2025, kitchen, urgent">
+    <label>Store / Vendor</label><input id="h-store" placeholder="e.g. Home Depot">
+    <label>Tags</label><input id="h-tags" placeholder="e.g. renovation-2025, kitchen">
     <label>Notes</label><input id="h-notes" placeholder="Details...">
-
     <div id="paint-fields" class="cat-fields">
       <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">🎨 Paint Details</div>
       <label>Brand</label><input id="h-paint-brand" placeholder="e.g. Benjamin Moore">
       <label>Color Name</label><input id="h-paint-color" placeholder="e.g. Revere Pewter">
       <label>Color Code</label><input id="h-paint-code" placeholder="e.g. HC-172">
-      <label>Finish</label>
-      <select id="h-paint-finish">
-        <option value="">—</option><option>Matte</option><option>Eggshell</option><option>Satin</option><option>Semi-gloss</option><option>Gloss</option>
-      </select>
-      <label>Paint Type</label>
-      <select id="h-paint-type">
-        <option value="">—</option><option>Latex</option><option>Oil-based</option><option>Primer</option>
-      </select>
+      <label>Finish</label><select id="h-paint-finish"><option value="">—</option><option>Matte</option><option>Eggshell</option><option>Satin</option><option>Semi-gloss</option><option>Gloss</option></select>
+      <label>Paint Type</label><select id="h-paint-type"><option value="">—</option><option>Latex</option><option>Oil-based</option><option>Primer</option></select>
       <label>Quantity Used</label><input id="h-paint-qty" placeholder="e.g. 2 gallons">
       <label>Coats Applied</label><input id="h-paint-coats" type="number" placeholder="2">
-      <label>Surface Type</label><input id="h-paint-surface" placeholder="e.g. Drywall, wood, concrete">
+      <label>Surface Type</label><input id="h-paint-surface" placeholder="e.g. Drywall, wood">
       <label>Last Touched Up</label><input id="h-paint-touchup" type="date">
     </div>
-
     <div id="appliance-fields" class="cat-fields" style="display:none">
       <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">🔌 Appliance Details</div>
       <label>Brand</label><input id="h-app-brand" placeholder="e.g. Samsung, LG">
@@ -242,49 +186,39 @@ h2{margin-bottom:16px;font-size:22px}
       <label>Warranty Expiry</label><input id="h-app-warranty" type="date">
       <label>Maintenance Schedule</label><input id="h-app-maint" placeholder="e.g. Clean filter every 3 months">
     </div>
-
     <div id="construction-fields" class="cat-fields" style="display:none">
       <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">🧱 Construction Details</div>
-      <label>Material Type</label><input id="h-con-material" placeholder="e.g. Concrete, mortar, sealant">
+      <label>Material Type</label><input id="h-con-material" placeholder="e.g. Concrete, mortar">
       <label>Product Name</label><input id="h-con-product" placeholder="Product name">
       <label>Mix Ratio</label><input id="h-con-mix" placeholder="If applicable">
-      <label>Application Method</label><input id="h-con-method" placeholder="How it was applied">
-      <label>Contractor vs DIY</label>
-      <select id="h-con-who"><option value="">—</option><option>DIY</option><option>Contractor</option></select>
+      <label>Application Method</label><input id="h-con-method" placeholder="How applied">
+      <label>Contractor vs DIY</label><select id="h-con-who"><option value="">—</option><option>DIY</option><option>Contractor</option></select>
       <label>Warranty Info</label><input id="h-con-warranty" placeholder="Warranty details">
     </div>
-
     <div style="border-top:1px solid #333;margin:14px 0 6px;padding-top:10px;font-size:13px;color:#ff6b6b">📷 Photos</div>
     <label>Add Photo</label><input type="file" id="h-photo-input" accept="image/*" multiple onchange="previewHousePhotos()" style="font-size:13px">
     <div id="h-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
-
-    <div class="actions">
-      <button class="secondary" onclick="closeHouseModal()">Cancel</button>
-      <button class="primary" onclick="saveHouseItem()">Save</button>
-    </div>
+    <div class="actions"><button class="secondary" onclick="closeHouseModal()">Cancel</button><button class="primary" onclick="saveHouseItem()">Save</button></div>
   </div>
 </div>
 
+<!-- Maintenance Modal -->
 <div class="overlay" id="maint-modal">
   <div class="modal">
     <h3 id="maint-modal-title">Maintenance Log</h3>
     <div id="maint-list" style="margin-bottom:14px"></div>
     <div style="border-top:1px solid #333;margin:10px 0;padding-top:10px;font-size:13px;color:#ff6b6b">Add Entry</div>
-    <label>Type</label>
-    <select id="mt-type"><option>Cleaning</option><option>Repair</option><option>Replacement</option><option>Inspection</option><option>Other</option></select>
+    <label>Type</label><select id="mt-type"><option>Cleaning</option><option>Repair</option><option>Replacement</option><option>Inspection</option><option>Other</option></select>
     <label>Date</label><input id="mt-date" type="date">
     <label>Next Due</label><input id="mt-next" type="date">
     <label>Cost ($)</label><input id="mt-cost" type="number" step="0.01" placeholder="0.00">
-    <label>Who Did It</label>
-    <select id="mt-who"><option>Me</option><option>Contractor</option></select>
+    <label>Who Did It</label><select id="mt-who"><option>Me</option><option>Contractor</option></select>
     <label>Notes</label><input id="mt-notes" placeholder="Details...">
-    <div class="actions">
-      <button class="secondary" onclick="closeMaintModal()">Close</button>
-      <button class="primary" onclick="addMaintEntry()">Add Entry</button>
-    </div>
+    <div class="actions"><button class="secondary" onclick="closeMaintModal()">Close</button><button class="primary" onclick="addMaintEntry()">Add Entry</button></div>
   </div>
 </div>
 
+<!-- Restaurant Modal -->
 <div class="overlay" id="rest-modal">
   <div class="modal">
     <h3 id="rest-modal-title">Add Restaurant</h3>
@@ -293,47 +227,72 @@ h2{margin-bottom:16px;font-size:22px}
     <label>Food Type</label><input id="r-type" placeholder="e.g. Thai, Pizza, Korean BBQ">
     <label>Comments</label><input id="r-comments" placeholder="Notes, recommendations...">
     <label>Website</label><input id="r-url" placeholder="https://...">
-    <div class="actions">
-      <button class="secondary" onclick="closeRestModal()">Cancel</button>
-      <button class="primary" onclick="saveRestaurant()">Save</button>
-    </div>
+    <div class="actions"><button class="secondary" onclick="closeRestModal()">Cancel</button><button class="primary" onclick="saveRestaurant()">Save</button></div>
   </div>
 </div>
 
+<!-- Event Modal -->
 <div class="overlay" id="event-modal">
   <div class="modal">
     <h3>Add Recurring Event</h3>
     <label>Event Name</label><input id="e-name" placeholder="e.g. Tulip Festival">
     <label>Date</label><input id="e-date" type="date">
-    <label>Recurrence</label>
-    <select id="e-recur">
-      <option value="yearly">Yearly</option>
-      <option value="monthly">Monthly</option>
-      <option value="biannual">Every 2 Years</option>
-      <option value="quarterly">Every 3 Months</option>
-      <option value="once">One-time</option>
-    </select>
+    <label>Recurrence</label><select id="e-recur"><option value="yearly">Yearly</option><option value="monthly">Monthly</option><option value="biannual">Every 2 Years</option><option value="quarterly">Every 3 Months</option><option value="once">One-time</option></select>
     <label>Notes (optional)</label><input id="e-notes" placeholder="Details...">
-    <div class="actions">
-      <button class="secondary" onclick="closeEventModal()">Cancel</button>
-      <button class="primary" onclick="addEvent()">Save</button>
-    </div>
+    <div class="actions"><button class="secondary" onclick="closeEventModal()">Cancel</button><button class="primary" onclick="addEvent()">Save</button></div>
   </div>
 </div>
 
+<!-- Bill Modal -->
+<div class="overlay" id="bill-modal">
+  <div class="modal">
+    <h3 id="bill-modal-title">Add Bill</h3>
+    <label>Name *</label><input id="b-name" placeholder="e.g. Hydro, Netflix">
+    <label>Amount ($)</label><input id="b-amount" type="number" step="0.01" placeholder="0.00">
+    <label>Due Date</label><input id="b-due" type="date">
+    <label>Category</label><select id="b-category"><option>Utilities</option><option>Subscriptions</option><option>Insurance</option><option>Mortgage/Rent</option><option>Phone/Internet</option><option>Transportation</option><option>Other</option></select>
+    <label>Status</label><select id="b-status"><option value="Pending">Pending</option><option value="Paid">Paid</option></select>
+    <label>Auto-pay</label><select id="b-autopay"><option value="no">No</option><option value="yes">Yes</option></select>
+    <label>Notes</label><input id="b-notes" placeholder="Details...">
+    <div class="actions"><button class="secondary" onclick="closeBillModal()">Cancel</button><button class="primary" onclick="saveBill()">Save</button></div>
+  </div>
+</div>
+
+<!-- Net Worth Modal -->
+<div class="overlay" id="nw-modal">
+  <div class="modal">
+    <h3>Log Net Worth Snapshot</h3>
+    <label>Date</label><input id="nw-date" type="date">
+    <label>Total Net Worth ($)</label><input id="nw-total" type="number" step="0.01" placeholder="0.00">
+    <label>Notes (optional)</label><input id="nw-notes" placeholder="e.g. Paid off car loan">
+    <div class="actions"><button class="secondary" onclick="closeNWModal()">Cancel</button><button class="primary" onclick="saveNWSnapshot()">Save</button></div>
+  </div>
+</div>
+
+<!-- Document Modal -->
+<div class="overlay" id="doc-modal">
+  <div class="modal">
+    <h3 id="doc-modal-title">Add Document</h3>
+    <label>Title *</label><input id="d-title" placeholder="e.g. Home Insurance Policy">
+    <label>Category</label><select id="d-category"><option>Insurance</option><option>Taxes</option><option>Home</option><option>Warranties</option><option>Financial</option><option>Medical</option><option>Vehicle</option><option>Other</option></select>
+    <label>Link (OneDrive, etc.)</label><input id="d-link" placeholder="https://...">
+    <label>Notes</label><input id="d-notes" placeholder="Details...">
+    <div class="actions"><button class="secondary" onclick="closeDocModal()">Cancel</button><button class="primary" onclick="saveDoc()">Save</button></div>
+  </div>
+</div>
+
+<!-- Import Modal -->
 <div class="overlay" id="import-modal">
   <div class="modal" style="max-width:500px">
     <h3 id="import-modal-title">Bulk Import</h3>
-    <p style="font-size:13px;color:#888;margin-bottom:10px">Paste your notes below. The first line of each block is the item name. URLs, prices, emails, phone numbers, and other details on following lines get grouped into that item automatically.</p>
+    <p style="font-size:13px;color:#888;margin-bottom:10px">Paste your notes below. First line = item name. URLs, prices, emails, phone numbers on following lines get grouped into that item.</p>
     <textarea id="import-text" rows="12" placeholder="Paste from Notes, OneDrive, etc..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #333;background:#0f0f0f;color:#e0e0e0;font-size:14px;resize:vertical;font-family:inherit"></textarea>
     <div id="import-preview" style="font-size:13px;color:#888;margin-top:8px"></div>
-    <div class="actions">
-      <button class="secondary" onclick="closeImportModal()">Cancel</button>
-      <button class="primary" onclick="runImport()">Import</button>
-    </div>
+    <div class="actions"><button class="secondary" onclick="closeImportModal()">Cancel</button><button class="primary" onclick="runImport()">Import</button></div>
   </div>
 </div>
 
+<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lb-close" onclick="closeLightbox()">×</button>
   <button class="lb-nav lb-prev" onclick="event.stopPropagation();navLightbox(-1)">‹</button>
@@ -342,10 +301,11 @@ h2{margin-bottom:16px;font-size:22px}
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=7"></script>
-<script src="defaults.js?v=7"></script>
-<script src="app.js?v=7"></script>
-<script src="house.js?v=7"></script>
+<script src="db.js?v=8"></script>
+<script src="defaults.js?v=8"></script>
+<script src="app.js?v=8"></script>
+<script src="house.js?v=8"></script>
+<script src="finance.js?v=8"></script>
 </div><!-- end #app -->
 </body>
 </html>
