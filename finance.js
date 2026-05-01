@@ -260,14 +260,14 @@ function renderContacts() {
   const list = DATA.contacts, el = document.getElementById('c-list');
   const q = document.getElementById('c-search').value.toLowerCase();
   const filtered = list.map((c, i) => ({...c, _i: i})).filter(c =>
-    !q || [c.name, c.phone, c.email, c.category, c.notes].some(f => (f||'').toLowerCase().includes(q))
+    !q || [c.name, c.phone, c.email, c.category, c.notes, c.address].some(f => (f||'').toLowerCase().includes(q))
   );
   document.getElementById('c-count').textContent = `${filtered.length} of ${list.length} contacts`;
   if (!filtered.length) { el.innerHTML = '<div class="empty">No contacts found</div>'; return; }
   el.innerHTML = filtered.map(c => {
     const metaParts = [c.phone, c.email].filter(Boolean);
     const nameHtml = c.url ? `<a href="${esc(c.url)}" target="_blank" onclick="event.stopPropagation()">${esc(c.name)}</a>` : esc(c.name);
-    return `<div class="card" onclick="editContact(${c._i})" style="cursor:pointer"><div class="info"><div class="name">${nameHtml}</div>${metaParts.length ? `<div class="meta">${metaParts.map(esc).join(' · ')}</div>` : ''}<div class="meta" style="color:#ff6b6b">${esc(c.category||'')}</div>${c.notes ? `<div class="comment">${esc(c.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delContact(${c._i})">×</button></div>`;
+    return `<div class="card" onclick="editContact(${c._i})" style="cursor:pointer"><div class="info"><div class="name">${nameHtml}</div>${metaParts.length ? `<div class="meta">${metaParts.map(esc).join(' · ')}</div>` : ''}${c.address ? `<div class="meta">📍 ${esc(c.address)}</div>` : ''}<div class="meta" style="color:#ff6b6b">${esc(c.category||'')}</div>${c.notes ? `<div class="comment">${esc(c.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delContact(${c._i})">×</button></div>`;
   }).join('');
 }
 
@@ -280,10 +280,11 @@ function openContactModal(idx) {
     document.getElementById('ct-phone').value = c.phone || '';
     document.getElementById('ct-email').value = c.email || '';
     document.getElementById('ct-url').value = c.url || '';
+    document.getElementById('ct-address').value = c.address || '';
     document.getElementById('ct-category').value = c.category || 'Other';
     document.getElementById('ct-notes').value = c.notes || '';
   } else {
-    ['ct-name','ct-phone','ct-email','ct-url','ct-notes'].forEach(id => document.getElementById(id).value = '');
+    ['ct-name','ct-phone','ct-email','ct-url','ct-address','ct-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('ct-category').value = 'Family';
   }
   document.getElementById('contact-modal').classList.add('show');
@@ -299,6 +300,7 @@ async function saveContact() {
     phone: document.getElementById('ct-phone').value.trim(),
     email: document.getElementById('ct-email').value.trim(),
     url: document.getElementById('ct-url').value.trim(),
+    address: document.getElementById('ct-address').value.trim(),
     category: document.getElementById('ct-category').value,
     notes: document.getElementById('ct-notes').value.trim()
   };
