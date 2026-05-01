@@ -126,6 +126,13 @@ function renderNWHistory() {
 async function delNW(i) { DATA.networth.splice(i, 1); await saveKey('networth'); renderNWHistory(); renderDashboard(); }
 
 // --- DASHBOARD ---
+function toggleDashBills() {
+  const el = document.getElementById('dash-bills-due');
+  const tog = document.getElementById('dash-bills-toggle');
+  if (el.style.display === 'none') { el.style.display = ''; tog.textContent = '▼'; }
+  else { el.style.display = 'none'; tog.textContent = '▶'; }
+}
+
 function renderDashboard() {
   // Net worth
   const nw = DATA.networth;
