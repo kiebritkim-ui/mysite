@@ -1,5 +1,6 @@
 // --- FINANCE: BILLS ---
 let billEditIndex = -1;
+function freqLabel(f) { return {monthly:'Monthly',biweekly:'Bi-weekly',weekly:'Weekly',quarterly:'Quarterly',yearly:'Yearly',once:'One-time'}[f]||f; }
 
 function showFinanceTab(tab) {
   document.getElementById('finance-bills').style.display = tab === 'bills' ? '' : 'none';
@@ -22,7 +23,7 @@ function renderBills() {
     return `<div class="bill-card" onclick="editBill(${b._i})">
       <div class="info">
         <div class="name">${esc(b.name)}</div>
-        <div class="meta">${b.due ? esc(b.due) : 'No due date'} · ${esc(b.category||'')}${b.autopay==='yes' ? ' · Auto-pay' : ''}</div>
+        <div class="meta">${b.due ? esc(b.due) : 'No due date'} · ${esc(b.category||'')}${b.frequency && b.frequency !== 'once' ? ' · ' + esc(freqLabel(b.frequency)) : ''}${b.autopay==='yes' ? ' · Auto-pay' : ''}</div>
         ${b.notes ? `<div class="meta" style="color:#aaa;font-style:italic">${esc(b.notes)}</div>` : ''}
       </div>
       <div>
@@ -41,6 +42,7 @@ function openBillModal(idx) {
     document.getElementById('b-name').value = b.name || '';
     document.getElementById('b-amount').value = b.amount || '';
     document.getElementById('b-due').value = b.due || '';
+    document.getElementById('b-frequency').value = b.frequency || 'monthly';
     document.getElementById('b-category').value = b.category || 'Utilities';
     document.getElementById('b-status').value = b.status || 'Pending';
     document.getElementById('b-autopay').value = b.autopay || 'no';
@@ -48,6 +50,7 @@ function openBillModal(idx) {
   } else {
     ['b-name','b-amount','b-due','b-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('b-category').value = 'Utilities';
+    document.getElementById('b-frequency').value = 'monthly';
     document.getElementById('b-status').value = 'Pending';
     document.getElementById('b-autopay').value = 'no';
   }
@@ -63,6 +66,7 @@ async function saveBill() {
     name,
     amount: parseFloat(document.getElementById('b-amount').value) || 0,
     due: document.getElementById('b-due').value,
+    frequency: document.getElementById('b-frequency').value,
     category: document.getElementById('b-category').value,
     status: document.getElementById('b-status').value,
     autopay: document.getElementById('b-autopay').value,
