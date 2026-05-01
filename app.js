@@ -123,6 +123,10 @@ function eventOccursOn(ev, year, month, day) {
   switch (ev.recur) {
     case 'yearly': return eM === month && eD === day;
     case 'monthly': return eD === day;
+    case '4weeks':
+      const target = new Date(year, month, day);
+      const diff = Math.round((target - d) / (1000*60*60*24));
+      return diff >= 0 && diff % 28 === 0;
     case 'biannual': return eM === month && eD === day && (year - eY) % 2 === 0;
     case 'quarterly': return eD === day && (month - eM + 12) % 3 === 0;
     case 'once': return eY === year && eM === month && eD === day;
@@ -162,16 +166,23 @@ function renderUpcoming(events) {
     });
   }
   if (!upcoming.length) { el.innerHTML = '<div class="empty">No upcoming events</div>'; return; }
-  const labels = { yearly: 'Annual', monthly: 'Monthly', biannual: 'Every 2 yrs', quarterly: 'Quarterly', once: 'One-time' };
-  el.innerHTML = '<h3>Upcoming (next 90 days)</h3>' + upcoming.map(u =>
-    `<div class="event-card"><div class="info"><div class="name">${esc(u.name)}</div><div class="meta">${u.next.toLocaleDateString('default',{month:'short',day:'numeric',year:'numeric'})}${u.notes ? ' · ' + esc(u.notes) : ''}</div></div><span class="recur">${labels[u.recur]}</span></div>`
-  ).join('');
+  const labels = { yearly: 'Annual', monthly: 'Monthly', '4weeks': 'Every 4 wks', biannual: 'Every 2 yrs', quarterly: 'Quarterly', once: 'One-time' };
+  el.innerHTML = '<h3>Upcoming (next 90 days)</h3>' + upcoming.map(u => {
+    const idx = DATA.events.findIndex(e => e.name === u.name && e.date === u.date);
+    return `<div class="event-card"><div class="info"><div class="name">${esc(u.name)}</div><div class="meta">${u.next.toLocaleDateString('default',{month:'short',day:'numeric',year:'numeric'})}${u.notes ? ' · ' + esc(u.notes) : ''}</div></div><span class="recur">${labels[u.recur]||u.recur}</span>${idx >= 0 ? `<button onclick="delEvent(${idx})" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;margin-left:8px">×</button>` : ''}</div>`;
+  }).join('');
 }
 
 function showDayEvents(day) {
   const matches = DATA.events.filter(e => eventOccursOn(e, calYear, calMonth, day));
   if (!matches.length) return;
   alert(matches.map(e => `${e.name}${e.notes ? ' — ' + e.notes : ''}`).join('\n'));
+}
+
+async function delEvent(i) {
+  DATA.events.splice(i, 1);
+  await saveKey('events');
+  renderCalendar();
 }
 
 function openEventModal() { document.getElementById('event-modal').classList.add('show'); }
