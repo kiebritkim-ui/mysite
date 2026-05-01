@@ -310,3 +310,46 @@ async function saveContact() {
 }
 
 async function delContact(i) { DATA.contacts.splice(i, 1); await saveKey('contacts'); renderContacts(); }
+
+// --- GLOBAL SEARCH ---
+function globalSearch() {
+  const q = document.getElementById('global-search').value.toLowerCase().trim();
+  const el = document.getElementById('global-results');
+  const content = document.getElementById('dash-content');
+  if (!q) { el.style.display = 'none'; content.style.display = ''; return; }
+  el.style.display = ''; content.style.display = 'none';
+  const results = [];
+
+  DATA.restaurants.forEach((r, i) => {
+    if ([r.name, r.location, r.type, r.comments, r.url].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'🍽 Restaurant', name: r.name, meta: [r.location, r.type].filter(Boolean).join(' · '), action: `showTab('restaurants')`});
+  });
+  DATA.movies.forEach(m => {
+    if ([m.title, m.genre].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'🎬 Movie', name: m.title, meta: m.genre || '', action: `showTab('movies')`});
+  });
+  DATA.house.forEach(h => {
+    if ([h.name, h.room, h.category, h.notes, h.store, h.tags, h.paint_brand, h.paint_color, h.paint_code, h.app_brand, h.app_model].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'🏠 House', name: h.name, meta: [h.room, h.category].filter(Boolean).join(' · '), action: `showTab('house')`});
+  });
+  DATA.bills.forEach(b => {
+    if ([b.name, b.category, b.notes].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'💰 Bill', name: b.name, meta: `$${b.amount} · ${b.category||''}`, action: `showTab('finance')`});
+  });
+  DATA.documents.forEach(d => {
+    if ([d.title, d.category, d.notes].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'🧾 Document', name: d.title, meta: d.category || '', action: `showTab('documents')`});
+  });
+  DATA.contacts.forEach(c => {
+    if ([c.name, c.phone, c.email, c.category, c.notes, c.url].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'👤 Contact', name: c.name, meta: [c.phone, c.email].filter(Boolean).join(' · '), action: `showTab('contacts')`});
+  });
+  (DATA.events||[]).forEach(ev => {
+    if ([ev.name, ev.notes].some(f => (f||'').toLowerCase().includes(q)))
+      results.push({section:'📅 Event', name: ev.name, meta: ev.notes || '', action: `showTab('calendar')`});
+  });
+
+  if (!results.length) { el.innerHTML = '<div class="empty">No results found</div>'; return; }
+  el.innerHTML = `<div style="font-size:13px;color:#888;margin-bottom:8px">${results.length} result${results.length>1?'s':''}</div>` +
+    results.map(r => `<div class="card" onclick="${r.action}" style="cursor:pointer"><div class="info"><div class="name">${esc(r.name)}</div><div class="meta">${esc(r.section)}${r.meta ? ' · ' + esc(r.meta) : ''}</div></div></div>`).join('');
+}

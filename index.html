@@ -46,6 +46,9 @@
 <!-- DASHBOARD -->
 <div id="dashboard" class="section active">
   <h2>🧭 Dashboard</h2>
+  <div class="search-row"><input id="global-search" placeholder="Search everything..." oninput="globalSearch()"></div>
+  <div id="global-results" style="display:none;margin-bottom:20px"></div>
+  <div id="dash-content">
   <div class="dash-grid">
     <div class="dash-card">
       <div class="dash-label">Net Worth</div>
@@ -62,6 +65,7 @@
   <div id="dash-bills-due"></div>
   <h3 class="dash-section-title">📅 Upcoming Events</h3>
   <div id="dash-events"></div>
+  </div>
 </div>
 
 <!-- FINANCE -->
@@ -326,11 +330,11 @@
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=11"></script>
-<script src="defaults.js?v=11"></script>
-<script src="app.js?v=11"></script>
-<script src="house.js?v=11"></script>
-<script src="finance.js?v=11"></script>
+<script src="db.js?v=12"></script>
+<script src="defaults.js?v=12"></script>
+<script src="app.js?v=12"></script>
+<script src="house.js?v=12"></script>
+<script src="finance.js?v=12"></script>
 </div><!-- end #app -->
 </body>
 </html>
