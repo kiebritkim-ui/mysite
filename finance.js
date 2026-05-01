@@ -192,10 +192,27 @@ function renderDocs() {
   el.innerHTML = Object.keys(grouped).sort().map(cat =>
     `<h3 style="font-size:14px;color:#888;margin:14px 0 8px">${esc(cat)}</h3>` +
     grouped[cat].map(d => {
-      const nameHtml = d.link ? `<a href="${esc(d.link)}" target="_blank">${esc(d.title)}</a>` : esc(d.title);
-      return `<div class="doc-card" onclick="editDoc(${d._i})" style="cursor:pointer"><div class="info"><div class="name">${nameHtml}</div>${d.notes ? `<div class="meta">${esc(d.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delDoc(${d._i})">×</button></div>`;
+      const nameHtml = d.link ? `<a href="${esc(d.link)}" target="_blank" onclick="event.stopPropagation()">${esc(d.title)}</a>` : esc(d.title);
+      const embedBtn = d.embed ? `<button onclick="event.stopPropagation();viewEmbed(${d._i})" style="background:none;border:1px solid #333;color:#aaa;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;margin-left:8px">📊 View</button>` : '';
+      return `<div class="doc-card" onclick="editDoc(${d._i})" style="cursor:pointer"><div class="info"><div class="name">${nameHtml}${embedBtn}</div>${d.notes ? `<div class="meta">${esc(d.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delDoc(${d._i})">×</button></div>`;
     }).join('')
   ).join('');
+}
+
+function viewEmbed(i) {
+  const d = DATA.documents[i];
+  if (!d.embed) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay show';
+  overlay.style.zIndex = '25';
+  overlay.innerHTML = `<div style="width:95vw;height:90vh;background:#1a1a1a;border-radius:12px;border:1px solid #333;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #333">
+      <span style="font-weight:600">${esc(d.title)}</span>
+      <button onclick="this.closest('.overlay').remove()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer">×</button>
+    </div>
+    <iframe src="${esc(d.embed)}" style="flex:1;border:none;background:#fff" allowfullscreen></iframe>
+  </div>`;
+  document.body.appendChild(overlay);
 }
 
 function openDocModal(idx) {
@@ -206,9 +223,10 @@ function openDocModal(idx) {
     document.getElementById('d-title').value = d.title || '';
     document.getElementById('d-category').value = d.category || 'Other';
     document.getElementById('d-link').value = d.link || '';
+    document.getElementById('d-embed').value = d.embed || '';
     document.getElementById('d-notes').value = d.notes || '';
   } else {
-    ['d-title','d-link','d-notes'].forEach(id => document.getElementById(id).value = '');
+    ['d-title','d-link','d-embed','d-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('d-category').value = 'Insurance';
   }
   document.getElementById('doc-modal').classList.add('show');
@@ -223,6 +241,7 @@ async function saveDoc() {
     title,
     category: document.getElementById('d-category').value,
     link: document.getElementById('d-link').value.trim(),
+    embed: document.getElementById('d-embed').value.trim(),
     notes: document.getElementById('d-notes').value.trim()
   };
   if (docEditIndex >= 0) DATA.documents[docEditIndex] = entry;

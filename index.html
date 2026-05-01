@@ -273,9 +273,10 @@
 <div class="overlay" id="doc-modal">
   <div class="modal">
     <h3 id="doc-modal-title">Add Document</h3>
-    <label>Title *</label><input id="d-title" placeholder="e.g. Home Insurance Policy">
-    <label>Category</label><select id="d-category"><option>Insurance</option><option>Taxes</option><option>Home</option><option>Warranties</option><option>Financial</option><option>Medical</option><option>Vehicle</option><option>Other</option></select>
+    <label>Title *</label><input id="d-title" placeholder="e.g. Monthly Budget">
+    <label>Category</label><select id="d-category"><option>Insurance</option><option>Taxes</option><option>Home</option><option>Warranties</option><option>Financial</option><option>Medical</option><option>Vehicle</option><option>Spreadsheets</option><option>Other</option></select>
     <label>Link (OneDrive, etc.)</label><input id="d-link" placeholder="https://...">
+    <label>Embed URL (for read-only view)</label><input id="d-embed" placeholder="Paste embed link from OneDrive">
     <label>Notes</label><input id="d-notes" placeholder="Details...">
     <div class="actions"><button class="secondary" onclick="closeDocModal()">Cancel</button><button class="primary" onclick="saveDoc()">Save</button></div>
   </div>
@@ -301,11 +302,11 @@
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=8"></script>
-<script src="defaults.js?v=8"></script>
-<script src="app.js?v=8"></script>
-<script src="house.js?v=8"></script>
-<script src="finance.js?v=8"></script>
+<script src="db.js?v=9"></script>
+<script src="defaults.js?v=9"></script>
+<script src="app.js?v=9"></script>
+<script src="house.js?v=9"></script>
+<script src="finance.js?v=9"></script>
 </div><!-- end #app -->
 </body>
 </html>
