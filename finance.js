@@ -266,7 +266,8 @@ function renderContacts() {
   if (!filtered.length) { el.innerHTML = '<div class="empty">No contacts found</div>'; return; }
   el.innerHTML = filtered.map(c => {
     const metaParts = [c.phone, c.email].filter(Boolean);
-    return `<div class="card" onclick="editContact(${c._i})" style="cursor:pointer"><div class="info"><div class="name">${esc(c.name)}</div>${metaParts.length ? `<div class="meta">${metaParts.map(esc).join(' · ')}</div>` : ''}<div class="meta" style="color:#ff6b6b">${esc(c.category||'')}</div>${c.notes ? `<div class="comment">${esc(c.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delContact(${c._i})">×</button></div>`;
+    const nameHtml = c.url ? `<a href="${esc(c.url)}" target="_blank" onclick="event.stopPropagation()">${esc(c.name)}</a>` : esc(c.name);
+    return `<div class="card" onclick="editContact(${c._i})" style="cursor:pointer"><div class="info"><div class="name">${nameHtml}</div>${metaParts.length ? `<div class="meta">${metaParts.map(esc).join(' · ')}</div>` : ''}<div class="meta" style="color:#ff6b6b">${esc(c.category||'')}</div>${c.notes ? `<div class="comment">${esc(c.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delContact(${c._i})">×</button></div>`;
   }).join('');
 }
 
@@ -278,10 +279,11 @@ function openContactModal(idx) {
     document.getElementById('ct-name').value = c.name || '';
     document.getElementById('ct-phone').value = c.phone || '';
     document.getElementById('ct-email').value = c.email || '';
+    document.getElementById('ct-url').value = c.url || '';
     document.getElementById('ct-category').value = c.category || 'Other';
     document.getElementById('ct-notes').value = c.notes || '';
   } else {
-    ['ct-name','ct-phone','ct-email','ct-notes'].forEach(id => document.getElementById(id).value = '');
+    ['ct-name','ct-phone','ct-email','ct-url','ct-notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('ct-category').value = 'Family';
   }
   document.getElementById('contact-modal').classList.add('show');
@@ -296,6 +298,7 @@ async function saveContact() {
     name,
     phone: document.getElementById('ct-phone').value.trim(),
     email: document.getElementById('ct-email').value.trim(),
+    url: document.getElementById('ct-url').value.trim(),
     category: document.getElementById('ct-category').value,
     notes: document.getElementById('ct-notes').value.trim()
   };
