@@ -252,3 +252,58 @@ async function saveDoc() {
 }
 
 async function delDoc(i) { DATA.documents.splice(i, 1); await saveKey('documents'); renderDocs(); }
+
+// --- CONTACTS ---
+let contactEditIndex = -1;
+
+function renderContacts() {
+  const list = DATA.contacts, el = document.getElementById('c-list');
+  const q = document.getElementById('c-search').value.toLowerCase();
+  const filtered = list.map((c, i) => ({...c, _i: i})).filter(c =>
+    !q || [c.name, c.phone, c.email, c.category, c.notes].some(f => (f||'').toLowerCase().includes(q))
+  );
+  document.getElementById('c-count').textContent = `${filtered.length} of ${list.length} contacts`;
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No contacts found</div>'; return; }
+  el.innerHTML = filtered.map(c => {
+    const metaParts = [c.phone, c.email].filter(Boolean);
+    return `<div class="card" onclick="editContact(${c._i})" style="cursor:pointer"><div class="info"><div class="name">${esc(c.name)}</div>${metaParts.length ? `<div class="meta">${metaParts.map(esc).join(' · ')}</div>` : ''}<div class="meta" style="color:#ff6b6b">${esc(c.category||'')}</div>${c.notes ? `<div class="comment">${esc(c.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delContact(${c._i})">×</button></div>`;
+  }).join('');
+}
+
+function openContactModal(idx) {
+  contactEditIndex = idx !== undefined ? idx : -1;
+  document.getElementById('contact-modal-title').textContent = contactEditIndex >= 0 ? 'Edit Contact' : 'Add Contact';
+  if (contactEditIndex >= 0) {
+    const c = DATA.contacts[contactEditIndex];
+    document.getElementById('ct-name').value = c.name || '';
+    document.getElementById('ct-phone').value = c.phone || '';
+    document.getElementById('ct-email').value = c.email || '';
+    document.getElementById('ct-category').value = c.category || 'Other';
+    document.getElementById('ct-notes').value = c.notes || '';
+  } else {
+    ['ct-name','ct-phone','ct-email','ct-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('ct-category').value = 'Family';
+  }
+  document.getElementById('contact-modal').classList.add('show');
+}
+function closeContactModal() { document.getElementById('contact-modal').classList.remove('show'); contactEditIndex = -1; }
+function editContact(i) { openContactModal(i); }
+
+async function saveContact() {
+  const name = document.getElementById('ct-name').value.trim();
+  if (!name) return;
+  const entry = {
+    name,
+    phone: document.getElementById('ct-phone').value.trim(),
+    email: document.getElementById('ct-email').value.trim(),
+    category: document.getElementById('ct-category').value,
+    notes: document.getElementById('ct-notes').value.trim()
+  };
+  if (contactEditIndex >= 0) DATA.contacts[contactEditIndex] = entry;
+  else DATA.contacts.push(entry);
+  await saveKey('contacts');
+  closeContactModal();
+  renderContacts();
+}
+
+async function delContact(i) { DATA.contacts.splice(i, 1); await saveKey('contacts'); renderContacts(); }

@@ -36,6 +36,7 @@
   <button onclick="showTab('house')">🏠 House</button>
   <button onclick="showTab('calendar')">📅 Calendar</button>
   <button onclick="showTab('documents')">🧾 Documents</button>
+  <button onclick="showTab('contacts')">👤 Contacts</button>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -143,6 +144,15 @@
   <h2>🧾 Documents</h2>
   <div class="add-row"><button onclick="openDocModal()">+ Add Document</button></div>
   <div id="doc-list"></div>
+</div>
+
+<!-- CONTACTS -->
+<div id="contacts" class="section">
+  <h2>👤 Contacts</h2>
+  <div class="search-row"><input id="c-search" placeholder="Search contacts..." oninput="renderContacts()"></div>
+  <div class="add-row"><button onclick="openContactModal()">+ Add Contact</button></div>
+  <div class="count" id="c-count"></div>
+  <div id="c-list"></div>
 </div>
 
 </div><!-- end .main -->
@@ -282,6 +292,19 @@
   </div>
 </div>
 
+<!-- Contact Modal -->
+<div class="overlay" id="contact-modal">
+  <div class="modal">
+    <h3 id="contact-modal-title">Add Contact</h3>
+    <label>Name *</label><input id="ct-name" placeholder="Full name">
+    <label>Phone</label><input id="ct-phone" type="tel" placeholder="613-555-1234">
+    <label>Email</label><input id="ct-email" type="email" placeholder="email@example.com">
+    <label>Category</label><select id="ct-category"><option>Family</option><option>Friend</option><option>Contractor</option><option>Business</option><option>Medical</option><option>Other</option></select>
+    <label>Notes</label><input id="ct-notes" placeholder="Details...">
+    <div class="actions"><button class="secondary" onclick="closeContactModal()">Cancel</button><button class="primary" onclick="saveContact()">Save</button></div>
+  </div>
+</div>
+
 <!-- Import Modal -->
 <div class="overlay" id="import-modal">
   <div class="modal" style="max-width:500px">
@@ -302,11 +325,11 @@
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=9"></script>
-<script src="defaults.js?v=9"></script>
-<script src="app.js?v=9"></script>
-<script src="house.js?v=9"></script>
-<script src="finance.js?v=9"></script>
+<script src="db.js?v=10"></script>
+<script src="defaults.js?v=10"></script>
+<script src="app.js?v=10"></script>
+<script src="house.js?v=10"></script>
+<script src="finance.js?v=10"></script>
 </div><!-- end #app -->
 </body>
 </html>

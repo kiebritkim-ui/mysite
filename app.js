@@ -10,12 +10,13 @@ function showTab(id) {
   document.getElementById(id).classList.add('active');
   const btn = document.querySelector(`.sidebar button[onclick="showTab('${id}')"]`);
   if (btn) btn.classList.add('active');
-  const titles = {dashboard:'Dashboard',finance:'Finance',restaurants:'Restaurants',movies:'Movies',house:'House',calendar:'Calendar',documents:'Documents'};
+  const titles = {dashboard:'Dashboard',finance:'Finance',restaurants:'Restaurants',movies:'Movies',house:'House',calendar:'Calendar',documents:'Documents',contacts:'Contacts'};
   document.getElementById('page-title').textContent = titles[id] || id;
   if (id === 'calendar') renderCalendar();
   if (id === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
   if (id === 'finance' && typeof renderBills === 'function') renderBills();
   if (id === 'documents' && typeof renderDocs === 'function') renderDocs();
+  if (id === 'contacts' && typeof renderContacts === 'function') renderContacts();
   // Close sidebar on mobile
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('show');
@@ -361,4 +362,5 @@ async function init() {
   if (typeof renderDashboard === 'function') renderDashboard();
   if (typeof renderBills === 'function') renderBills();
   if (typeof renderDocs === 'function') renderDocs();
+  if (typeof renderContacts === 'function') renderContacts();
 }

@@ -12,7 +12,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
 
-let DATA = { restaurants: [], movies: [], events: [], house: [], bills: [], networth: [], documents: [] };
+let DATA = { restaurants: [], movies: [], events: [], house: [], bills: [], networth: [], documents: [], contacts: [] };
 let authToken = null;
 
 // --- Auth ---
@@ -73,6 +73,7 @@ async function loadAll() {
     DATA.bills = d.bills || [];
     DATA.networth = d.networth || [];
     DATA.documents = d.documents || [];
+    DATA.contacts = d.contacts || [];
   }
 }
 
