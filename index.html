@@ -37,6 +37,7 @@
   <button onclick="showTab('calendar')">📅 Calendar</button>
   <button onclick="showTab('documents')">🧾 Documents</button>
   <button onclick="showTab('contacts')">👤 Contacts</button>
+  <button onclick="showTab('todos')">✅ To Do</button>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -63,6 +64,8 @@
   </div>
   <h3 class="dash-section-title">📅 Upcoming Events</h3>
   <div id="dash-events"></div>
+  <h3 class="dash-section-title" onclick="toggleDashTodos()" style="cursor:pointer">✅ To Do <span id="dash-todos-toggle" style="font-size:12px;color:#555">▶</span></h3>
+  <div id="dash-todos" style="display:none"></div>
   <h3 class="dash-section-title" onclick="toggleDashBills()" style="cursor:pointer">⚠️ Bills Due Soon <span id="dash-bills-toggle" style="font-size:12px;color:#555">▶</span></h3>
   <div id="dash-bills-due" style="display:none"></div>
   </div>
@@ -148,6 +151,17 @@
   <h2>🧾 Documents</h2>
   <div class="add-row"><button onclick="openDocModal()">+ Add Document</button></div>
   <div id="doc-list"></div>
+</div>
+
+<!-- TO DO -->
+<div id="todos" class="section">
+  <h2>✅ To Do</h2>
+  <div class="add-row">
+    <input id="todo-input" placeholder="Add a task..." onkeydown="if(event.key==='Enter')addTodo()">
+    <button onclick="addTodo()">Add</button>
+  </div>
+  <div id="todo-list"></div>
+  <div id="todo-done-section" style="margin-top:20px"></div>
 </div>
 
 <!-- CONTACTS -->
@@ -332,11 +346,11 @@
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=16"></script>
-<script src="defaults.js?v=16"></script>
-<script src="app.js?v=16"></script>
-<script src="house.js?v=16"></script>
-<script src="finance.js?v=16"></script>
+<script src="db.js?v=17"></script>
+<script src="defaults.js?v=17"></script>
+<script src="app.js?v=17"></script>
+<script src="house.js?v=17"></script>
+<script src="finance.js?v=17"></script>
 </div><!-- end #app -->
 </body>
 </html>

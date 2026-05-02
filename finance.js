@@ -190,6 +190,9 @@ function renderDashboard() {
   } else {
     evEl.innerHTML = upcoming.map(u => `<div class="card"><div class="info"><div class="name">${esc(u.name)}</div><div class="meta">${esc(u.date)}</div></div></div>`).join('');
   }
+
+  // To Do
+  if (typeof renderDashTodos === 'function') renderDashTodos();
 }
 
 // --- DOCUMENTS ---
@@ -365,4 +368,64 @@ function globalSearch() {
   if (!results.length) { el.innerHTML = '<div class="empty">No results found</div>'; return; }
   el.innerHTML = `<div style="font-size:13px;color:#888;margin-bottom:8px">${results.length} result${results.length>1?'s':''}</div>` +
     results.map(r => `<div class="card" onclick="${r.action}" style="cursor:pointer"><div class="info"><div class="name">${esc(r.name)}</div><div class="meta">${esc(r.section)}${r.meta ? ' · ' + esc(r.meta) : ''}</div></div></div>`).join('');
+}
+
+// --- TO DO ---
+async function addTodo() {
+  const input = document.getElementById('todo-input');
+  const text = input.value.trim();
+  if (!text) return;
+  DATA.todos.push({ text, done: false, created: new Date().toISOString().slice(0,10) });
+  await saveKey('todos');
+  input.value = '';
+  renderTodos();
+  renderDashboard();
+}
+
+async function toggleTodo(i) {
+  DATA.todos[i].done = !DATA.todos[i].done;
+  await saveKey('todos');
+  renderTodos();
+  renderDashboard();
+}
+
+async function delTodo(i) {
+  DATA.todos.splice(i, 1);
+  await saveKey('todos');
+  renderTodos();
+  renderDashboard();
+}
+
+function renderTodos() {
+  const pending = DATA.todos.filter((t, i) => !t.done).map((t, _, arr) => ({...t, _i: DATA.todos.indexOf(t)}));
+  const done = DATA.todos.filter((t, i) => t.done).map((t, _, arr) => ({...t, _i: DATA.todos.indexOf(t)}));
+  const el = document.getElementById('todo-list');
+  if (!pending.length) { el.innerHTML = '<div class="empty">All done! 🎉</div>'; }
+  else {
+    el.innerHTML = pending.map(t =>
+      `<div class="card" style="cursor:pointer" onclick="toggleTodo(${t._i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#555">☐</span><span>${esc(t.text)}</span></div><button class="del" onclick="event.stopPropagation();delTodo(${t._i})">×</button></div>`
+    ).join('');
+  }
+  const doneEl = document.getElementById('todo-done-section');
+  if (done.length) {
+    doneEl.innerHTML = `<h3 style="font-size:14px;color:#555;margin-bottom:8px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'">Completed (${done.length}) ▼</h3><div>` +
+      done.map(t => `<div class="card" style="opacity:.5;cursor:pointer" onclick="toggleTodo(${t._i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#66bb6a">☑</span><span style="text-decoration:line-through">${esc(t.text)}</span></div><button class="del" onclick="event.stopPropagation();delTodo(${t._i})">×</button></div>`).join('') + '</div>';
+  } else { doneEl.innerHTML = ''; }
+}
+
+function toggleDashTodos() {
+  const el = document.getElementById('dash-todos');
+  const tog = document.getElementById('dash-todos-toggle');
+  if (el.style.display === 'none') { el.style.display = ''; tog.textContent = '▼'; }
+  else { el.style.display = 'none'; tog.textContent = '▶'; }
+}
+
+function renderDashTodos() {
+  const pending = DATA.todos.filter(t => !t.done);
+  const el = document.getElementById('dash-todos');
+  if (!pending.length) { el.innerHTML = '<div style="color:#555;font-size:13px;padding:4px 0">All done! 🎉</div>'; return; }
+  el.innerHTML = pending.map((t, idx) => {
+    const i = DATA.todos.indexOf(t);
+    return `<div class="card" style="cursor:pointer;padding:10px 14px" onclick="toggleTodo(${i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#555">☐</span><span style="font-size:14px">${esc(t.text)}</span></div></div>`;
+  }).join('');
 }
