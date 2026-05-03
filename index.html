@@ -38,6 +38,7 @@
   <button onclick="showTab('documents')">🧾 Documents</button>
   <button onclick="showTab('contacts')">👤 Contacts</button>
   <button onclick="showTab('todos')">✅ To Do</button>
+  <button onclick="showTab('groceries')">🛒 Groceries</button>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -68,6 +69,8 @@
   <div id="dash-todos" style="display:none"></div>
   <h3 class="dash-section-title" onclick="toggleDashBills()" style="cursor:pointer">⚠️ Bills Due Soon <span id="dash-bills-toggle" style="font-size:12px;color:#555">▶</span></h3>
   <div id="dash-bills-due" style="display:none"></div>
+  <h3 class="dash-section-title" onclick="toggleDashGroceries()" style="cursor:pointer">🛒 Groceries <span id="dash-groceries-toggle" style="font-size:12px;color:#555">▶</span></h3>
+  <div id="dash-groceries" style="display:none"></div>
   </div>
 </div>
 
@@ -162,6 +165,16 @@
   </div>
   <div id="todo-list"></div>
   <div id="todo-done-section" style="margin-top:20px"></div>
+</div>
+
+<!-- GROCERIES -->
+<div id="groceries" class="section">
+  <h2>🛒 Groceries</h2>
+  <div class="add-row">
+    <input id="groc-input" placeholder="Add item..." onkeydown="if(event.key==='Enter')addGrocery()">
+    <button onclick="addGrocery()">Add</button>
+  </div>
+  <div id="groc-list"></div>
 </div>
 
 <!-- CONTACTS -->
@@ -346,11 +359,11 @@
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=17"></script>
-<script src="defaults.js?v=17"></script>
-<script src="app.js?v=17"></script>
-<script src="house.js?v=17"></script>
-<script src="finance.js?v=17"></script>
+<script src="db.js?v=18"></script>
+<script src="defaults.js?v=18"></script>
+<script src="app.js?v=18"></script>
+<script src="house.js?v=18"></script>
+<script src="finance.js?v=18"></script>
 </div><!-- end #app -->
 </body>
 </html>

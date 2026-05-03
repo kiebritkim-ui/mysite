@@ -193,6 +193,8 @@ function renderDashboard() {
 
   // To Do
   if (typeof renderDashTodos === 'function') renderDashTodos();
+  // Groceries
+  if (typeof renderDashGroceries === 'function') renderDashGroceries();
 }
 
 // --- DOCUMENTS ---
@@ -427,5 +429,75 @@ function renderDashTodos() {
   el.innerHTML = pending.map((t, idx) => {
     const i = DATA.todos.indexOf(t);
     return `<div class="card" style="cursor:pointer;padding:10px 14px" onclick="toggleTodo(${i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#555">☐</span><span style="font-size:14px">${esc(t.text)}</span></div></div>`;
+  }).join('');
+}
+
+// --- GROCERIES ---
+async function addGrocery() {
+  const input = document.getElementById('groc-input');
+  const text = input.value.trim();
+  if (!text) return;
+  DATA.groceries.push({ text, done: false });
+  await saveKey('groceries');
+  input.value = '';
+  renderGroceries();
+  renderDashboard();
+}
+
+async function toggleGrocery(i) {
+  DATA.groceries[i].done = !DATA.groceries[i].done;
+  await saveKey('groceries');
+  renderGroceries();
+  renderDashboard();
+}
+
+async function delGrocery(i) {
+  DATA.groceries.splice(i, 1);
+  await saveKey('groceries');
+  renderGroceries();
+  renderDashboard();
+}
+
+async function clearDoneGroceries() {
+  DATA.groceries = DATA.groceries.filter(g => !g.done);
+  await saveKey('groceries');
+  renderGroceries();
+  renderDashboard();
+}
+
+function renderGroceries() {
+  const pending = DATA.groceries.map((g, i) => ({...g, _i: i})).filter(g => !g.done);
+  const done = DATA.groceries.map((g, i) => ({...g, _i: i})).filter(g => g.done);
+  const el = document.getElementById('groc-list');
+  let html = '';
+  if (!pending.length && !done.length) { el.innerHTML = '<div class="empty">List is empty</div>'; return; }
+  if (pending.length) {
+    html += pending.map(g =>
+      `<div class="card" style="cursor:pointer;padding:10px 14px" onclick="toggleGrocery(${g._i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#555">☐</span><span>${esc(g.text)}</span></div><button class="del" onclick="event.stopPropagation();delGrocery(${g._i})">×</button></div>`
+    ).join('');
+  }
+  if (done.length) {
+    html += `<div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#555">Checked off (${done.length})</span><button onclick="clearDoneGroceries()" style="background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer">Clear</button></div>`;
+    html += done.map(g =>
+      `<div class="card" style="opacity:.5;cursor:pointer;padding:10px 14px" onclick="toggleGrocery(${g._i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#66bb6a">☑</span><span style="text-decoration:line-through">${esc(g.text)}</span></div></div>`
+    ).join('');
+  }
+  el.innerHTML = html;
+}
+
+function toggleDashGroceries() {
+  const el = document.getElementById('dash-groceries');
+  const tog = document.getElementById('dash-groceries-toggle');
+  if (el.style.display === 'none') { el.style.display = ''; tog.textContent = '▼'; }
+  else { el.style.display = 'none'; tog.textContent = '▶'; }
+}
+
+function renderDashGroceries() {
+  const pending = DATA.groceries.filter(g => !g.done);
+  const el = document.getElementById('dash-groceries');
+  if (!pending.length) { el.innerHTML = '<div style="color:#555;font-size:13px;padding:4px 0">List is empty</div>'; return; }
+  el.innerHTML = pending.map(g => {
+    const i = DATA.groceries.indexOf(g);
+    return `<div class="card" style="cursor:pointer;padding:10px 14px" onclick="toggleGrocery(${i})"><div class="info" style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;color:#555">☐</span><span style="font-size:14px">${esc(g.text)}</span></div></div>`;
   }).join('');
 }

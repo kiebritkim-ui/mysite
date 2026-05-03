@@ -10,7 +10,7 @@ function showTab(id) {
   document.getElementById(id).classList.add('active');
   const btn = document.querySelector(`.sidebar button[onclick="showTab('${id}')"]`);
   if (btn) btn.classList.add('active');
-  const titles = {dashboard:'Dashboard',finance:'Finance',restaurants:'Restaurants',movies:'Movies',house:'House',calendar:'Calendar',documents:'Documents',contacts:'Contacts',todos:'To Do'};
+  const titles = {dashboard:'Dashboard',finance:'Finance',restaurants:'Restaurants',movies:'Movies',house:'House',calendar:'Calendar',documents:'Documents',contacts:'Contacts',todos:'To Do',groceries:'Groceries'};
   document.getElementById('page-title').textContent = titles[id] || id;
   if (id === 'calendar') renderCalendar();
   if (id === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
@@ -18,6 +18,7 @@ function showTab(id) {
   if (id === 'documents' && typeof renderDocs === 'function') renderDocs();
   if (id === 'contacts' && typeof renderContacts === 'function') renderContacts();
   if (id === 'todos' && typeof renderTodos === 'function') renderTodos();
+  if (id === 'groceries' && typeof renderGroceries === 'function') renderGroceries();
   // Close sidebar on mobile
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('show');
@@ -376,4 +377,5 @@ async function init() {
   if (typeof renderDocs === 'function') renderDocs();
   if (typeof renderContacts === 'function') renderContacts();
   if (typeof renderTodos === 'function') renderTodos();
+  if (typeof renderGroceries === 'function') renderGroceries();
 }
