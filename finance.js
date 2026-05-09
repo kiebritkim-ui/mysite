@@ -287,7 +287,10 @@ function renderReceipts() {
     const meta = [r.vendor, r.category, dateFmt].filter(Boolean).map(esc).join(' · ');
     const fileCount = (r.files || []).length;
     const fileIcon = fileCount ? `📎${fileCount} ` : '';
-    return `<div class="card" onclick="editReceipt(${r._i})" style="cursor:pointer"><div class="info"><div class="name">${fileIcon}${amt ? `<strong>${amt}</strong>` : ''}${r.vendor ? ' — ' + esc(r.vendor) : ''}</div>${meta ? `<div class="meta">${meta}</div>` : ''}${r.desc ? `<div class="comment">${esc(r.desc)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delReceipt(${r._i})">×</button></div>`;
+    const thumbs = (r.files||[]).filter(f => f.type && f.type.startsWith('image/')).slice(0,3).map((f,fi) =>
+      `<img src="${f.data}" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid #333;cursor:pointer" onclick="event.stopPropagation();openLightbox(DATA.receipts[${r._i}].files.filter(x=>x.type&&x.type.startsWith('image/')).map(x=>x.data),${fi})">`
+    ).join('');
+    return `<div class="card" onclick="editReceipt(${r._i})" style="cursor:pointer"><div class="info"><div class="name">${fileIcon}${amt ? `<strong>${amt}</strong>` : ''}${r.vendor ? ' — ' + esc(r.vendor) : ''}</div>${meta ? `<div class="meta">${meta}</div>` : ''}${r.desc ? `<div class="comment">${esc(r.desc)}</div>` : ''}${thumbs ? `<div style="display:flex;gap:4px;margin-top:6px" onclick="event.stopPropagation()">${thumbs}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delReceipt(${r._i})">×</button></div>`;
   }).join('');
 }
 

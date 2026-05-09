@@ -25,6 +25,44 @@ function showLightboxPhoto() {
   document.getElementById('lb-count').textContent = lbPhotos.length > 1 ? `${lbIndex + 1} / ${lbPhotos.length}` : '';
   document.querySelector('.lb-prev').style.display = lbPhotos.length > 1 ? '' : 'none';
   document.querySelector('.lb-next').style.display = lbPhotos.length > 1 ? '' : 'none';
+  document.getElementById('lb-share-btn').style.display = navigator.share ? '' : 'none';
+}
+
+function sharePhotoEmail() {
+  const src = lbPhotos[lbIndex];
+  const blob = dataURLtoBlob(src);
+  const file = new File([blob], 'photo.' + (blob.type.split('/')[1] || 'jpg'), {type: blob.type});
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    navigator.share({files:[file], title:'Shared Photo'}).catch(()=>{});
+  } else {
+    window.location.href = 'mailto:?subject=Shared Photo&body=Photo attached (please use Download button and attach manually)';
+    downloadPhoto();
+  }
+}
+
+function sharePhotoNative() {
+  const src = lbPhotos[lbIndex];
+  const blob = dataURLtoBlob(src);
+  const file = new File([blob], 'photo.' + (blob.type.split('/')[1] || 'jpg'), {type: blob.type});
+  if (navigator.share) {
+    navigator.share({files:[file], title:'Shared Photo'}).catch(()=>{});
+  }
+}
+
+function downloadPhoto() {
+  const a = document.createElement('a');
+  a.href = lbPhotos[lbIndex];
+  a.download = 'photo_' + (lbIndex + 1) + '.' + (lbPhotos[lbIndex].match(/image\/(\w+)/)?.[1] || 'jpg');
+  a.click();
+}
+
+function dataURLtoBlob(dataurl) {
+  const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while(n--) u8arr[n] = bstr.charCodeAt(n);
+  return new Blob([u8arr], {type: mime});
 }
 
 function toggleHouseFields() {

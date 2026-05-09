@@ -405,13 +405,18 @@
   <img id="lb-img" src="" alt="photo">
   <button class="lb-nav lb-next" onclick="event.stopPropagation();navLightbox(1)">›</button>
   <div class="lb-count" id="lb-count"></div>
+  <div class="lb-actions" onclick="event.stopPropagation()" style="position:absolute;bottom:40px;display:flex;gap:10px">
+    <button onclick="sharePhotoEmail()" style="background:#222;border:1px solid #444;color:#ccc;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px">📧 Email</button>
+    <button onclick="sharePhotoNative()" id="lb-share-btn" style="background:#222;border:1px solid #444;color:#ccc;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;display:none">📤 Share</button>
+    <button onclick="downloadPhoto()" style="background:#222;border:1px solid #444;color:#ccc;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px">⬇ Download</button>
+  </div>
 </div>
 
-<script src="db.js?v=19"></script>
-<script src="defaults.js?v=19"></script>
-<script src="app.js?v=19"></script>
-<script src="house.js?v=19"></script>
-<script src="finance.js?v=19"></script>
+<script src="db.js?v=20"></script>
+<script src="defaults.js?v=20"></script>
+<script src="app.js?v=20"></script>
+<script src="house.js?v=20"></script>
+<script src="finance.js?v=20"></script>
 </div><!-- end #app -->
 </body>
 </html>
