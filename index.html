@@ -36,6 +36,7 @@
   <button onclick="showTab('house')">🏠 House</button>
   <button onclick="showTab('calendar')">📅 Calendar</button>
   <button onclick="showTab('documents')">🧾 Documents</button>
+  <button onclick="showTab('receipts')">🧾 Receipts</button>
   <button onclick="showTab('contacts')">👤 Contacts</button>
   <button onclick="showTab('todos')">✅ To Do</button>
   <button onclick="showTab('groceries')">🛒 Groceries</button>
@@ -154,6 +155,15 @@
   <h2>🧾 Documents</h2>
   <div class="add-row"><button onclick="openDocModal()">+ Add Document</button></div>
   <div id="doc-list"></div>
+</div>
+
+<!-- RECEIPTS -->
+<div id="receipts" class="section">
+  <h2>🧾 Receipts</h2>
+  <div class="search-row"><input id="rcpt-search" placeholder="Search receipts..." oninput="renderReceipts()"></div>
+  <div class="add-row"><button onclick="openReceiptModal()">+ Add Receipt</button></div>
+  <div class="count" id="rcpt-count"></div>
+  <div id="rcpt-list"></div>
 </div>
 
 <!-- TO DO -->
@@ -339,6 +349,44 @@
   </div>
 </div>
 
+<!-- Receipt Modal -->
+<div class="overlay" id="receipt-modal">
+  <div class="modal" style="max-width:500px">
+    <h3 id="receipt-modal-title">Add Receipt</h3>
+    <label>File Upload *</label>
+    <div id="rcpt-drop-zone" style="border:2px dashed #444;border-radius:8px;padding:20px;text-align:center;cursor:pointer;margin-bottom:8px" onclick="document.getElementById('rcpt-file').click()" ondragover="event.preventDefault();this.style.borderColor='#ff6b6b'" ondragleave="this.style.borderColor='#444'" ondrop="event.preventDefault();this.style.borderColor='#444';handleReceiptFiles(event.dataTransfer.files)">
+      <div style="font-size:24px;margin-bottom:6px">📎</div>
+      <div style="font-size:13px;color:#888">Drag & drop or click to browse<br>JPG, PNG, PDF, HEIC</div>
+    </div>
+    <input type="file" id="rcpt-file" accept=".jpg,.jpeg,.png,.pdf,.heic,image/*" multiple onchange="handleReceiptFiles(this.files)" style="display:none" capture="environment">
+    <button onclick="document.getElementById('rcpt-file').setAttribute('capture','environment');document.getElementById('rcpt-file').click()" style="font-size:12px;background:#222;border:1px solid #444;color:#ccc;padding:6px 12px;border-radius:6px;cursor:pointer;margin-bottom:10px">📷 Take Photo</button>
+    <div id="rcpt-file-preview" style="font-size:12px;color:#888;margin-bottom:10px"></div>
+    <label>Total Amount ($)</label><input id="rcpt-amount" type="number" step="0.01" placeholder="0.00">
+    <label>Date of Purchase</label><input id="rcpt-date" type="date">
+    <label>Vendor / Merchant Name</label><input id="rcpt-vendor" placeholder="e.g. Costco, Home Depot">
+    <label>Expense Category</label>
+    <select id="rcpt-category">
+      <option value="">— Select —</option>
+      <option>Groceries</option>
+      <option>Dining</option>
+      <option>Transportation</option>
+      <option>Utilities</option>
+      <option>Home Improvement</option>
+      <option>Electronics</option>
+      <option>Clothing</option>
+      <option>Health/Medical</option>
+      <option>Entertainment</option>
+      <option>Subscriptions</option>
+      <option>Insurance</option>
+      <option>Education</option>
+      <option>Gifts</option>
+      <option>Other</option>
+    </select>
+    <label>Description</label><input id="rcpt-desc" placeholder="Brief description...">
+    <div class="actions"><button class="secondary" onclick="closeReceiptModal()">Cancel</button><button class="primary" onclick="saveReceipt()">Save</button></div>
+  </div>
+</div>
+
 <!-- Import Modal -->
 <div class="overlay" id="import-modal">
   <div class="modal" style="max-width:500px">
@@ -359,11 +407,11 @@
   <div class="lb-count" id="lb-count"></div>
 </div>
 
-<script src="db.js?v=18"></script>
-<script src="defaults.js?v=18"></script>
-<script src="app.js?v=18"></script>
-<script src="house.js?v=18"></script>
-<script src="finance.js?v=18"></script>
+<script src="db.js?v=19"></script>
+<script src="defaults.js?v=19"></script>
+<script src="app.js?v=19"></script>
+<script src="house.js?v=19"></script>
+<script src="finance.js?v=19"></script>
 </div><!-- end #app -->
 </body>
 </html>

@@ -269,6 +269,88 @@ async function saveDoc() {
 
 async function delDoc(i) { DATA.documents.splice(i, 1); await saveKey('documents'); renderDocs(); }
 
+// --- RECEIPTS ---
+let rcptEditIndex = -1;
+let rcptFiles = [];
+
+function renderReceipts() {
+  const list = DATA.receipts, el = document.getElementById('rcpt-list');
+  const q = (document.getElementById('rcpt-search').value || '').toLowerCase();
+  const filtered = list.map((r, i) => ({...r, _i: i})).filter(r =>
+    !q || [r.vendor, r.category, r.desc, r.amount+''].some(f => (f||'').toLowerCase().includes(q))
+  );
+  document.getElementById('rcpt-count').textContent = `${filtered.length} of ${list.length} receipts`;
+  if (!filtered.length) { el.innerHTML = '<div class="empty">No receipts yet</div>'; return; }
+  el.innerHTML = filtered.map(r => {
+    const amt = r.amount ? `$${parseFloat(r.amount).toFixed(2)}` : '';
+    const dateFmt = r.date ? new Date(r.date + 'T00:00:00').toLocaleDateString('default',{month:'short',day:'numeric',year:'numeric'}) : '';
+    const meta = [r.vendor, r.category, dateFmt].filter(Boolean).map(esc).join(' · ');
+    const fileCount = (r.files || []).length;
+    const fileIcon = fileCount ? `📎${fileCount} ` : '';
+    return `<div class="card" onclick="editReceipt(${r._i})" style="cursor:pointer"><div class="info"><div class="name">${fileIcon}${amt ? `<strong>${amt}</strong>` : ''}${r.vendor ? ' — ' + esc(r.vendor) : ''}</div>${meta ? `<div class="meta">${meta}</div>` : ''}${r.desc ? `<div class="comment">${esc(r.desc)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delReceipt(${r._i})">×</button></div>`;
+  }).join('');
+}
+
+function handleReceiptFiles(files) {
+  if (!files || !files.length) return;
+  const allowed = ['image/jpeg','image/png','image/heic','image/heif','application/pdf'];
+  const preview = document.getElementById('rcpt-file-preview');
+  Array.from(files).forEach(file => {
+    if (!allowed.includes(file.type) && !file.name.match(/\.(heic|heif)$/i)) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      rcptFiles.push({ name: file.name, data: reader.result, type: file.type });
+      preview.textContent = `${rcptFiles.length} file(s) selected: ${rcptFiles.map(f => f.name).join(', ')}`;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function openReceiptModal(idx) {
+  rcptEditIndex = idx !== undefined ? idx : -1;
+  rcptFiles = [];
+  document.getElementById('receipt-modal-title').textContent = rcptEditIndex >= 0 ? 'Edit Receipt' : 'Add Receipt';
+  const preview = document.getElementById('rcpt-file-preview');
+  if (rcptEditIndex >= 0) {
+    const r = DATA.receipts[rcptEditIndex];
+    document.getElementById('rcpt-amount').value = r.amount || '';
+    document.getElementById('rcpt-date').value = r.date || '';
+    document.getElementById('rcpt-vendor').value = r.vendor || '';
+    document.getElementById('rcpt-category').value = r.category || '';
+    document.getElementById('rcpt-desc').value = r.desc || '';
+    rcptFiles = r.files || [];
+    preview.textContent = rcptFiles.length ? `${rcptFiles.length} file(s): ${rcptFiles.map(f => f.name).join(', ')}` : '';
+  } else {
+    ['rcpt-amount','rcpt-vendor','rcpt-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('rcpt-date').value = '';
+    document.getElementById('rcpt-category').value = '';
+    preview.textContent = '';
+  }
+  document.getElementById('rcpt-file').value = '';
+  document.getElementById('receipt-modal').classList.add('show');
+}
+function closeReceiptModal() { document.getElementById('receipt-modal').classList.remove('show'); rcptEditIndex = -1; rcptFiles = []; }
+function editReceipt(i) { openReceiptModal(i); }
+
+async function saveReceipt() {
+  if (!rcptFiles.length && rcptEditIndex < 0) { alert('Please attach at least one file.'); return; }
+  const entry = {
+    files: rcptFiles,
+    amount: document.getElementById('rcpt-amount').value.trim(),
+    date: document.getElementById('rcpt-date').value,
+    vendor: document.getElementById('rcpt-vendor').value.trim(),
+    category: document.getElementById('rcpt-category').value,
+    desc: document.getElementById('rcpt-desc').value.trim()
+  };
+  if (rcptEditIndex >= 0) DATA.receipts[rcptEditIndex] = entry;
+  else DATA.receipts.push(entry);
+  await saveKey('receipts');
+  closeReceiptModal();
+  renderReceipts();
+}
+
+async function delReceipt(i) { DATA.receipts.splice(i, 1); await saveKey('receipts'); renderReceipts(); }
+
 // --- CONTACTS ---
 let contactEditIndex = -1;
 
