@@ -2,6 +2,38 @@
 let billEditIndex = -1;
 function freqLabel(f) { return {monthly:'Monthly',biweekly:'Bi-weekly',weekly:'Weekly',quarterly:'Quarterly',yearly:'Yearly',once:'One-time'}[f]||f; }
 
+// --- PRIVACY TOGGLE ---
+const privacyState = JSON.parse(localStorage.getItem('privacyState') || '{}');
+
+function togglePrivacy(field) {
+  privacyState[field] = !privacyState[field];
+  localStorage.setItem('privacyState', JSON.stringify(privacyState));
+  applyPrivacy();
+}
+
+function applyPrivacy() {
+  const nwVal = document.getElementById('dash-networth');
+  const nwSub = document.getElementById('dash-nw-change');
+  const expVal = document.getElementById('dash-expenses');
+  const expSub = document.getElementById('dash-bills-count');
+  const btnNw = document.getElementById('priv-btn-networth');
+  const btnExp = document.getElementById('priv-btn-expenses');
+  if (privacyState.networth) {
+    nwVal.classList.add('hidden'); nwSub.classList.add('hidden');
+    if (btnNw) btnNw.textContent = '🙈';
+  } else {
+    nwVal.classList.remove('hidden'); nwSub.classList.remove('hidden');
+    if (btnNw) btnNw.textContent = '👁';
+  }
+  if (privacyState.expenses) {
+    expVal.classList.add('hidden'); expSub.classList.add('hidden');
+    if (btnExp) btnExp.textContent = '🙈';
+  } else {
+    expVal.classList.remove('hidden'); expSub.classList.remove('hidden');
+    if (btnExp) btnExp.textContent = '👁';
+  }
+}
+
 function showFinanceTab(tab) {
   document.getElementById('finance-bills').style.display = tab === 'bills' ? '' : 'none';
   document.getElementById('finance-networth').style.display = tab === 'networth' ? '' : 'none';
@@ -195,6 +227,8 @@ function renderDashboard() {
   if (typeof renderDashTodos === 'function') renderDashTodos();
   // Groceries
   if (typeof renderDashGroceries === 'function') renderDashGroceries();
+  // Apply privacy state
+  applyPrivacy();
 }
 
 // --- DOCUMENTS ---
@@ -508,7 +542,7 @@ function toggleDashTodos() {
 }
 
 function renderDashTodos() {
-  const pending = DATA.todos.filter(t => !t.done);
+  const pending = DATA.todos.filter(t => !t.done).sort((a, b) => (a.text||'').localeCompare(b.text||''));
   const el = document.getElementById('dash-todos');
   if (!pending.length) { el.innerHTML = '<div style="color:#555;font-size:13px;padding:4px 0">All done! 🎉</div>'; return; }
   el.innerHTML = pending.map((t, idx) => {
@@ -578,7 +612,7 @@ function toggleDashGroceries() {
 }
 
 function renderDashGroceries() {
-  const pending = DATA.groceries.filter(g => !g.done);
+  const pending = DATA.groceries.filter(g => !g.done).sort((a, b) => (a.text||'').localeCompare(b.text||''));
   const el = document.getElementById('dash-groceries');
   if (!pending.length) { el.innerHTML = '<div style="color:#555;font-size:13px;padding:4px 0">List is empty</div>'; return; }
   el.innerHTML = pending.map(g => {
