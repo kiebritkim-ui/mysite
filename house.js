@@ -84,7 +84,7 @@ function renderHouse() {
       h.paint_brand, h.paint_color, h.paint_code,
       h.app_brand, h.app_model, h.con_material, h.con_product
     ].some(f => (f||'').toLowerCase().includes(q));
-  });
+  }).sort((a, b) => (a.name||'').localeCompare(b.name||''));
   document.getElementById('h-count').textContent = `${filtered.length} of ${list.length} items`;
   if (!filtered.length) { el.innerHTML = '<div class="empty">No items found</div>'; return; }
 

@@ -15,7 +15,7 @@ function renderBills() {
   document.getElementById('bill-count').textContent = `${list.length} bills`;
   if (!list.length) { el.innerHTML = '<div class="empty">No bills yet</div>'; return; }
   const today = new Date().toISOString().slice(0, 10);
-  const sorted = list.map((b, i) => ({...b, _i: i})).sort((a, b) => (a.due || '').localeCompare(b.due || ''));
+  const sorted = list.map((b, i) => ({...b, _i: i})).sort((a, b) => (a.name||'').localeCompare(b.name||''));
   el.innerHTML = sorted.map(b => {
     let statusClass = 'pending';
     if (b.status === 'Paid') statusClass = 'paid';
@@ -207,7 +207,7 @@ function renderDocs() {
   list.forEach((d, i) => { const cat = d.category || 'Other'; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push({...d, _i: i}); });
   el.innerHTML = Object.keys(grouped).sort().map(cat =>
     `<h3 style="font-size:14px;color:#888;margin:14px 0 8px">${esc(cat)}</h3>` +
-    grouped[cat].map(d => {
+    grouped[cat].sort((a, b) => (a.title||'').localeCompare(b.title||'')).map(d => {
       const nameHtml = d.link ? `<a href="${esc(d.link)}" target="_blank" onclick="event.stopPropagation()">${esc(d.title)}</a>` : esc(d.title);
       const embedBtn = d.embed ? `<button onclick="event.stopPropagation();viewEmbed(${d._i})" style="background:none;border:1px solid #333;color:#aaa;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;margin-left:8px">📊 View</button>` : '';
       return `<div class="doc-card" onclick="editDoc(${d._i})" style="cursor:pointer"><div class="info"><div class="name">${nameHtml}${embedBtn}</div>${d.notes ? `<div class="meta">${esc(d.notes)}</div>` : ''}</div><button class="del" onclick="event.stopPropagation();delDoc(${d._i})">×</button></div>`;
@@ -278,7 +278,7 @@ function renderReceipts() {
   const q = (document.getElementById('rcpt-search').value || '').toLowerCase();
   const filtered = list.map((r, i) => ({...r, _i: i})).filter(r =>
     !q || [r.vendor, r.category, r.desc, r.amount+''].some(f => (f||'').toLowerCase().includes(q))
-  );
+  ).sort((a, b) => (a.vendor||'').localeCompare(b.vendor||''));
   document.getElementById('rcpt-count').textContent = `${filtered.length} of ${list.length} receipts`;
   if (!filtered.length) { el.innerHTML = '<div class="empty">No receipts yet</div>'; return; }
   el.innerHTML = filtered.map(r => {
@@ -362,7 +362,7 @@ function renderContacts() {
   const q = document.getElementById('c-search').value.toLowerCase();
   const filtered = list.map((c, i) => ({...c, _i: i})).filter(c =>
     !q || [c.name, c.phone, c.email, c.category, c.notes, c.address].some(f => (f||'').toLowerCase().includes(q))
-  );
+  ).sort((a, b) => (a.name||'').localeCompare(b.name||''));
   document.getElementById('c-count').textContent = `${filtered.length} of ${list.length} contacts`;
   if (!filtered.length) { el.innerHTML = '<div class="empty">No contacts found</div>'; return; }
   el.innerHTML = filtered.map(c => {
@@ -484,8 +484,8 @@ async function delTodo(i) {
 }
 
 function renderTodos() {
-  const pending = DATA.todos.filter((t, i) => !t.done).map((t, _, arr) => ({...t, _i: DATA.todos.indexOf(t)}));
-  const done = DATA.todos.filter((t, i) => t.done).map((t, _, arr) => ({...t, _i: DATA.todos.indexOf(t)}));
+  const pending = DATA.todos.filter((t, i) => !t.done).map((t, _, arr) => ({...t, _i: DATA.todos.indexOf(t)})).sort((a, b) => (a.text||'').localeCompare(b.text||''));
+  const done = DATA.todos.filter((t, i) => t.done).map((t, _, arr) => ({...t, _i: DATA.todos.indexOf(t)})).sort((a, b) => (a.text||'').localeCompare(b.text||''));
   const el = document.getElementById('todo-list');
   if (!pending.length) { el.innerHTML = '<div class="empty">All done! 🎉</div>'; }
   else {
@@ -551,8 +551,8 @@ async function clearDoneGroceries() {
 }
 
 function renderGroceries() {
-  const pending = DATA.groceries.map((g, i) => ({...g, _i: i})).filter(g => !g.done);
-  const done = DATA.groceries.map((g, i) => ({...g, _i: i})).filter(g => g.done);
+  const pending = DATA.groceries.map((g, i) => ({...g, _i: i})).filter(g => !g.done).sort((a, b) => (a.text||'').localeCompare(b.text||''));
+  const done = DATA.groceries.map((g, i) => ({...g, _i: i})).filter(g => g.done).sort((a, b) => (a.text||'').localeCompare(b.text||''));
   const el = document.getElementById('groc-list');
   let html = '';
   if (!pending.length && !done.length) { el.innerHTML = '<div class="empty">List is empty</div>'; return; }

@@ -33,7 +33,7 @@ function renderRestaurants() {
   const q = document.getElementById('r-search').value.toLowerCase();
   const filtered = list.map((r, i) => ({...r, _i: i})).filter(r =>
     !q || r.name.toLowerCase().includes(q) || (r.type||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q) || (r.comments||'').toLowerCase().includes(q)
-  );
+  ).sort((a, b) => (a.name||'').localeCompare(b.name||''));
   document.getElementById('r-count').textContent = `${filtered.length} of ${list.length} restaurants`;
   if (!filtered.length) { el.innerHTML = '<div class="empty">No restaurants found</div>'; return; }
   el.innerHTML = filtered.map(r => {
@@ -95,7 +95,8 @@ async function delRestaurant(i) {
 function renderMovies() {
   const list = DATA.movies, el = document.getElementById('m-list');
   if (!list.length) { el.innerHTML = '<div class="empty">No movies yet</div>'; return; }
-  el.innerHTML = list.map((m, i) => `<div class="card"><div class="info"><div class="name">${esc(m.title)}</div>${m.genre ? `<div class="meta">${esc(m.genre)}</div>` : ''}</div><button class="del" onclick="delMovie(${i})">×</button></div>`).join('');
+  const sorted = list.map((m, i) => ({...m, _i: i})).sort((a, b) => (a.title||'').localeCompare(b.title||''));
+  el.innerHTML = sorted.map(m => `<div class="card"><div class="info"><div class="name">${esc(m.title)}</div>${m.genre ? `<div class="meta">${esc(m.genre)}</div>` : ''}</div><button class="del" onclick="delMovie(${m._i})">×</button></div>`).join('');
 }
 
 async function addMovie() {
