@@ -441,6 +441,10 @@ async function runImport() {
 
 // --- INIT ---
 async function init() {
+  // Clean up any leftover trial banner from old cached code
+  const oldBanner = document.getElementById('trial-banner');
+  if (oldBanner) oldBanner.remove();
+  
   await loadAll();
   // Seed defaults if DB is empty
   if (!DATA.restaurants.length) {
