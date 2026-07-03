@@ -21,7 +21,14 @@ const SUB_STATUS = {
 const TRIAL_DAYS = 14;
 
 // --- Subscription Check ---
+// Owner email — bypasses all subscription checks
+const OWNER_EMAIL = 'kiebritkim@gmail.com';
+
 async function getSubscriptionStatus() {
+  // Owner always gets full access
+  if (auth.currentUser && auth.currentUser.email === OWNER_EMAIL) {
+    return { status: SUB_STATUS.ACTIVE };
+  }
   const subData = await dbGet('subscription');
   if (!subData) {
     // First time user — start trial

@@ -33,20 +33,6 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('app').style.display = 'block';
     document.getElementById('user-info').textContent = user.displayName || user.email;
     try {
-      // Check Stripe return first
-      await handleStripeReturn();
-      // Check subscription status
-      const sub = await getSubscriptionStatus();
-      if (sub.status === 'expired') {
-        showPaywall();
-        return;
-      }
-      if (sub.status === 'trial') {
-        showTrialBanner(sub.daysLeft);
-      }
-      if (sub.status === 'active') {
-        showManageSubscription();
-      }
       await init();
     } catch(e) {
       console.error('Init error:', e);
