@@ -171,9 +171,11 @@ function renderUpcoming(events) {
   }
   if (!upcoming.length) { el.innerHTML = '<div class="empty">No upcoming events</div>'; return; }
   const labels = { yearly: 'Annual', monthly: 'Monthly', '4weeks': 'Every 4 wks', biannual: 'Every 2 yrs', quarterly: 'Quarterly', once: 'One-time' };
+  const reminderLabels = { '15': '15m', '60': '1h', '1440': '1d', '4320': '3d', '10080': '1w' };
   el.innerHTML = '<h3>Upcoming (next 90 days)</h3>' + upcoming.map(u => {
     const idx = DATA.events.findIndex(e => e.name === u.name && e.date === u.date);
-    return `<div class="event-card"><div class="info"><div class="name">${esc(u.name)}</div><div class="meta">${u.next.toLocaleDateString('default',{month:'short',day:'numeric',year:'numeric'})}${u.notes ? ' · ' + esc(u.notes) : ''}</div></div><span class="recur">${labels[u.recur]||u.recur}</span>${idx >= 0 ? `<button onclick="delEvent(${idx})" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;margin-left:8px">×</button>` : ''}</div>`;
+    const reminderBadge = u.reminder ? `<span style="font-size:11px;background:#333;color:#ff6b6b;padding:2px 6px;border-radius:4px;margin-left:6px">🔔 ${reminderLabels[u.reminder] || u.reminder}</span>` : '';
+    return `<div class="event-card" onclick="openEventModal(${idx})" style="cursor:pointer"><div class="info"><div class="name">${esc(u.name)}${reminderBadge}</div><div class="meta">${u.next.toLocaleDateString('default',{month:'short',day:'numeric',year:'numeric'})}${u.notes ? ' · ' + esc(u.notes) : ''}</div></div><span class="recur">${labels[u.recur]||u.recur}</span>${idx >= 0 ? `<button onclick="event.stopPropagation();delEvent(${idx})" style="background:none;border:none;color:#555;font-size:18px;cursor:pointer;margin-left:8px">×</button>` : ''}</div>`;
   }).join('');
 }
 
@@ -189,24 +191,102 @@ async function delEvent(i) {
   renderCalendar();
 }
 
-function openEventModal() { document.getElementById('event-modal').classList.add('show'); }
-function closeEventModal() { document.getElementById('event-modal').classList.remove('show'); }
+let eventEditIndex = -1;
 
-async function addEvent() {
+function openEventModal(idx) {
+  eventEditIndex = idx !== undefined ? idx : -1;
+  document.getElementById('event-modal-title').textContent = eventEditIndex >= 0 ? 'Edit Event' : 'Add Event';
+  if (eventEditIndex >= 0) {
+    const ev = DATA.events[eventEditIndex];
+    document.getElementById('e-name').value = ev.name || '';
+    document.getElementById('e-date').value = ev.date || '';
+    document.getElementById('e-recur').value = ev.recur || 'yearly';
+    document.getElementById('e-reminder').value = ev.reminder || '';
+    document.getElementById('e-notes').value = ev.notes || '';
+  } else {
+    ['e-name','e-date','e-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('e-recur').value = 'yearly';
+    document.getElementById('e-reminder').value = '';
+  }
+  document.getElementById('event-modal').classList.add('show');
+}
+function closeEventModal() { document.getElementById('event-modal').classList.remove('show'); eventEditIndex = -1; }
+
+async function saveEvent() {
   const name = document.getElementById('e-name').value.trim();
   const date = document.getElementById('e-date').value;
   if (!name || !date) return;
-  DATA.events.push({ name, date, recur: document.getElementById('e-recur').value, notes: document.getElementById('e-notes').value.trim() });
+  const entry = {
+    name,
+    date,
+    recur: document.getElementById('e-recur').value,
+    reminder: document.getElementById('e-reminder').value,
+    notes: document.getElementById('e-notes').value.trim()
+  };
+  if (eventEditIndex >= 0) {
+    DATA.events[eventEditIndex] = entry;
+  } else {
+    DATA.events.push(entry);
+  }
   await saveKey('events');
   document.getElementById('e-name').value = '';
   document.getElementById('e-date').value = '';
   document.getElementById('e-notes').value = '';
   closeEventModal();
   renderCalendar();
+  // Schedule notification if reminder is set
+  if (entry.reminder && 'Notification' in window) {
+    scheduleReminder(entry);
+  }
 }
 
 // --- BULK IMPORT ---
 let importTarget = '';
+
+// --- NOTIFICATIONS ---
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function scheduleReminder(ev) {
+  if (!ev.reminder || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const reminderMinutes = parseInt(ev.reminder);
+  // Find next occurrence
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today); d.setDate(d.getDate() + i);
+    if (eventOccursOn(ev, d.getFullYear(), d.getMonth(), d.getDate())) {
+      const eventTime = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0); // assume 9 AM
+      const notifyTime = new Date(eventTime.getTime() - reminderMinutes * 60000);
+      const delay = notifyTime.getTime() - Date.now();
+      if (delay > 0 && delay < 7 * 86400000) { // only schedule if within 7 days
+        setTimeout(() => {
+          new Notification(`🔔 ${ev.name}`, {
+            body: `Coming up ${reminderMinutes >= 1440 ? 'in ' + Math.round(reminderMinutes/1440) + ' day(s)' : reminderMinutes >= 60 ? 'in ' + Math.round(reminderMinutes/60) + ' hour(s)' : 'in ' + reminderMinutes + ' min'}`,
+            icon: '🏠',
+            tag: ev.name
+          });
+        }, delay);
+      }
+      break;
+    }
+  }
+}
+
+function scheduleAllReminders() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  (DATA.events || []).forEach(ev => {
+    if (ev.reminder) scheduleReminder(ev);
+  });
+}
+
+// Request permission on first load + schedule existing reminders
+setTimeout(() => {
+  requestNotificationPermission();
+  scheduleAllReminders();
+}, 2000);
 
 function openImportModal(target) {
   importTarget = target;

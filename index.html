@@ -285,12 +285,22 @@
 <!-- Event Modal -->
 <div class="overlay" id="event-modal">
   <div class="modal">
-    <h3>Add Recurring Event</h3>
+    <h3 id="event-modal-title">Add Event</h3>
     <label>Event Name</label><input id="e-name" placeholder="e.g. Tulip Festival">
     <label>Date</label><input id="e-date" type="date">
+    <label>Recurrence</label>
     <select id="e-recur"><option value="yearly">Yearly</option><option value="monthly">Monthly</option><option value="4weeks">Every 4 Weeks</option><option value="biannual">Every 2 Years</option><option value="quarterly">Every 3 Months</option><option value="once">One-time</option></select>
+    <label>Reminder</label>
+    <select id="e-reminder">
+      <option value="">No reminder</option>
+      <option value="15">15 minutes before</option>
+      <option value="60">1 hour before</option>
+      <option value="1440">1 day before</option>
+      <option value="4320">3 days before</option>
+      <option value="10080">1 week before</option>
+    </select>
     <label>Notes (optional)</label><input id="e-notes" placeholder="Details...">
-    <div class="actions"><button class="secondary" onclick="closeEventModal()">Cancel</button><button class="primary" onclick="addEvent()">Save</button></div>
+    <div class="actions"><button class="secondary" onclick="closeEventModal()">Cancel</button><button class="primary" onclick="saveEvent()">Save</button></div>
   </div>
 </div>
 
@@ -412,11 +422,17 @@
   </div>
 </div>
 
-<script src="db.js?v=24"></script>
-<script src="defaults.js?v=24"></script>
-<script src="app.js?v=24"></script>
-<script src="house.js?v=24"></script>
-<script src="finance.js?v=24"></script>
+<script src="db.js?v=25"></script>
+<script src="defaults.js?v=25"></script>
+<script src="app.js?v=25"></script>
+<script src="house.js?v=25"></script>
+<script src="finance.js?v=25"></script>
+<script>
+// Register service worker for background notifications
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed:', err));
+}
+</script>
 </div><!-- end #app -->
 </body>
 </html>
