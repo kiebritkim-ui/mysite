@@ -422,15 +422,19 @@
   </div>
 </div>
 
-<script src="db.js?v=26"></script>
-<script src="defaults.js?v=26"></script>
-<script src="app.js?v=26"></script>
-<script src="house.js?v=26"></script>
-<script src="finance.js?v=26"></script>
+<script src="db.js?v=27"></script>
+<script src="defaults.js?v=27"></script>
+<script src="app.js?v=27"></script>
+<script src="house.js?v=27"></script>
+<script src="finance.js?v=27"></script>
 <script>
-// Register service worker for background notifications
+// Force-clear old service workers and re-register
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed:', err));
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister());
+  }).then(() => {
+    navigator.serviceWorker.register('sw.js?v=2').catch(err => console.log('SW reg failed:', err));
+  });
 }
 </script>
 </div><!-- end #app -->
