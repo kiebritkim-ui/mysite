@@ -252,15 +252,21 @@ function renderDocs() {
 function viewEmbed(i) {
   const d = DATA.documents[i];
   if (!d.embed) return;
+  // Use the embed URL as-is for viewing; construct edit link from the base URL
+  let embedUrl = d.embed;
+  let editUrl = d.link || d.embed;
   const overlay = document.createElement('div');
   overlay.className = 'overlay show';
   overlay.style.zIndex = '25';
   overlay.innerHTML = `<div style="width:95vw;height:90vh;background:#1a1a1a;border-radius:12px;border:1px solid #333;display:flex;flex-direction:column;overflow:hidden">
     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #333">
       <span style="font-weight:600">${esc(d.title)}</span>
-      <button onclick="this.closest('.overlay').remove()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer">×</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <a href="${esc(editUrl)}" target="_blank" style="background:none;border:1px solid #444;color:#aaa;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;text-decoration:none">✏️ Edit in Excel Online</a>
+        <button onclick="this.closest('.overlay').remove()" style="background:none;border:none;color:#aaa;font-size:22px;cursor:pointer">×</button>
+      </div>
     </div>
-    <iframe src="${esc(d.embed)}" style="flex:1;border:none;background:#fff" allowfullscreen></iframe>
+    <iframe src="${esc(embedUrl)}" style="flex:1;border:none;background:#fff" allowfullscreen></iframe>
   </div>`;
   document.body.appendChild(overlay);
 }

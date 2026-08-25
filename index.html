@@ -338,7 +338,7 @@
     <label>Title *</label><input id="d-title" placeholder="e.g. Monthly Budget">
     <label>Category</label><select id="d-category"><option>Insurance</option><option>Taxes</option><option>Home</option><option>Warranties</option><option>Financial</option><option>Medical</option><option>Vehicle</option><option>Spreadsheets</option><option>Other</option></select>
     <label>Link (OneDrive, etc.)</label><input id="d-link" placeholder="https://...">
-    <label>Embed URL (for read-only view)</label><input id="d-embed" placeholder="Paste embed link from OneDrive">
+    <label>Embed URL (OneDrive = editable)</label><input id="d-embed" placeholder="Paste OneDrive/SharePoint share link">
     <label>Notes</label><input id="d-notes" placeholder="Details...">
     <div class="actions"><button class="secondary" onclick="closeDocModal()">Cancel</button><button class="primary" onclick="saveDoc()">Save</button></div>
   </div>
@@ -422,11 +422,11 @@
   </div>
 </div>
 
-<script src="db.js?v=27"></script>
-<script src="defaults.js?v=27"></script>
-<script src="app.js?v=27"></script>
-<script src="house.js?v=27"></script>
-<script src="finance.js?v=27"></script>
+<script src="db.js?v=28"></script>
+<script src="defaults.js?v=28"></script>
+<script src="app.js?v=28"></script>
+<script src="house.js?v=28"></script>
+<script src="finance.js?v=28"></script>
 <script>
 // Force-clear old service workers and re-register
 if ('serviceWorker' in navigator) {
